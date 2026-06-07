@@ -49,6 +49,15 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v6
 
+      - name: "Update Package Version"
+        uses: cssnr/update-json-value-action@v2
+        with:
+          file: "package.json"
+
+      - name: "Debug Package File"
+        continue-on-error: true
+        run: cat package.json
+
       - name: "Docker Login"
         uses: docker/login-action@v4
         with:
