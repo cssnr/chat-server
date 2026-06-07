@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: ghcr.io/cssnr/docker-nginx-proxy:latest
+    environment:
+      SERVICE_NAME: "app"
+      SERVICE_PORT: "3000"
+      BASIC_AUTH: ${BASIC_AUTH}
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 64M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.${STACK_NAME?err}.rule=Host(`${TRAEFIK_HOST?err}`)"
+        - "traefik.http.routers.${STACK_NAME}.entrypoints=https"
+        - "traefik.http.routers.${STACK_NAME}.tls=true"
+        - "traefik.http.services.${STACK_NAME}.loadbalancer.server.port=80"
+        #- "traefik.http.routers.${STACK_NAME}.tls.certresolver=le"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf localhost:80/health-check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - app
+    networks:
+      - internal
+      - traefik-public
+
+  app:
+    image: ghcr.io/cssnr/chat-server:${VERSION:-latest}
+    environment:
+      VERSION: ${VERSION}
+      STACK_NAME: ${STACK_NAME}
+      TRAEFIK_HOST: ${TRAEFIK_HOST}
+      MODEL: ${MODEL}
+      MAX_TOKENS: ${MAX_TOKENS}
+      INSTRUCTIONS: ${INSTRUCTIONS}
+      AI_SDK_LOG_WARNINGS: ${AI_SDK_LOG_WARNINGS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY}
+      PROVIDER_API_KEY: ${PROVIDER_API_KEY}
+      BASE_URL: ${BASE_URL}
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 256M
+    #healthcheck:
+    #  test: ["CMD-SHELL", "curl -sf localhost:3000/app-health-check || exit 1"]
+    #  interval: 30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 30s
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: overlay
+  traefik-public:
+    external: true

@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: ghcr.io/cssnr/docker-nginx-proxy:latest
+    env_file: settings.env
+    environment:
+      SERVICE_NAME: "app"
+      SERVICE_PORT: "3000"
+      #BASIC_AUTH: ${BASIC_AUTH}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf localhost:80/health-check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      - app
+    ports:
+      - "${PORT:-80}:80"
+
+  app:
+    image: ghcr.io/cssnr/chat-server:latest
+    env_file: settings.env
+    #healthcheck:
+    #  test: ["CMD-SHELL", "curl -sf localhost:3000/app-health-check || exit 1"]
+    #  interval: 30s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 30s

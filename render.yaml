@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: chat-server
+    plan: free
+    runtime: image
+    image:
+      url: ghcr.io/cssnr/chat-server:latest
+    dockerCommand: npm start
+    #healthCheckPath: /app-health-check
+    envVars:
+      - key: MODEL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PROVIDER_API_KEY
+        sync: false

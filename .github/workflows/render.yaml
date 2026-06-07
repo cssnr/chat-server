@@ -1,0 +1,90 @@
+name: "Render"
+
+on:
+  push:
+    branches-ignore: [master, main]
+    paths:
+      - ".github/workflows/render.yaml"
+      - "src/**"
+      - "package*.json"
+  workflow_call:
+    #inputs:
+    #  version:
+    #    description: "Version Tag"
+    #    type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version Tag"
+
+env:
+  version: ${{ inputs.version || github.ref_name }}
+
+jobs:
+  render:
+    if: ${{ !contains(github.event.head_commit.message, '#norender') }}
+    #if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion != '' && github.event.workflow_run.conclusion == 'success' || true }}
+    name: "Render"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    #environment:
+    #  name: render
+    #  url: https://chat-server.onrender.com/
+
+    steps:
+      - name: "Debug event.json"
+        if: ${{ !github.event.act }}
+        continue-on-error: true
+        run: cat "${GITHUB_EVENT_PATH}"
+      - name: "Debug CTX github"
+        if: ${{ !github.event.act }}
+        continue-on-error: true
+        env:
+          GITHUB_CTX: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CTX"
+      - name: "Debug Environment"
+        if: ${{ !github.event.act }}
+        continue-on-error: true
+        run: env
+
+      - name: "Debug ref"
+        continue-on-error: true
+        run: |
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "inputs.version: ${{ inputs.version }}"
+          echo "env.version: ${{ env.version }}"
+          echo "--------------------"
+          echo "ref: ${{ github.ref_name }}"
+
+      - name: "Debug imgURL"
+        continue-on-error: true
+        env:
+          version: ${{ env.version == 'master' && 'latest' || env.version }}
+        run: |
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "inputs.version: ${{ inputs.version }}"
+          echo "env.version: ${{ env.version }}"
+          echo "--------------------"
+          echo "imgURL: ghcr.io/${{ github.repository }}:${{ env.version }}"
+
+      ## https://render.com/docs/deploy-hooks#deploying-from-an-image-registry
+      ## NOTE: Confirm we can do image and dockerfile deployments simultaneously...
+      #- name: "Deploy Image"
+      #  if: ${{ inputs.version }}
+      #  uses: cssnr/web-request-action@v2
+      #  env:
+      #    version: ${{ env.version == 'master' && 'latest' || env.version }}
+      #  with:
+      #    url: ${{ secrets.RENDER_HOOK }}
+      #    params: |
+      #      imgURL: ghcr.io/${{ github.repository }}:${{ env.version }}
+
+      - name: "Deploy Branch"
+        #if: ${{ !inputs.version }}
+        uses: cssnr/web-request-action@v2
+        with:
+          url: ${{ secrets.RENDER_HOOK }}
+          params: |
+            ref: ${{ github.sha }}

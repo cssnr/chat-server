@@ -1,0 +1,90 @@
+name: "Deploy"
+
+on:
+  workflow_call:
+    inputs: &inputs
+      version:
+        description: "Version Tag"
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs: *inputs
+  #workflow_run:
+  #  workflows: ["Build"]
+  #  types: [completed]
+
+env:
+  stack-file: docker-compose-swarm.yaml
+  traefik-host: ${{ secrets.TRAEFIK_HOST }}
+  stack-name: ${{ github.repository_owner }}-${{ github.event.repository.name }}
+  version: ${{ inputs.version || github.event.workflow_run.head_branch || github.ref_name }}
+  origins: "*.cssnr.com,cssnr.github.io,smashedr.github.io,django-files.github.io"
+
+jobs:
+  deploy:
+    #if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    name: "Deploy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    #environment:
+    #  name: swarm
+    #  url: https://chat-server.cssnr.com/
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Debug event.json"
+        continue-on-error: true
+        run: cat "${GITHUB_EVENT_PATH}"
+      - name: "Debug CTX github"
+        continue-on-error: true
+        env:
+          GITHUB_CTX: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CTX"
+      - name: "Debug Environment"
+        continue-on-error: true
+        run: env
+
+      - name: "Debug"
+        continue-on-error: true
+        run: |
+          echo "inputs.version: ${{ inputs.version }}"
+          echo "github.event.workflow_run.head_branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "env.version: ${{ env.version }}"
+
+      - name: "Portainer Deploy"
+        uses: cssnr/portainer-stack-deploy-action@v1
+        env:
+          version: ${{ env.version == 'master' && 'latest' || env.version }}
+        with:
+          url: ${{ secrets.PORTAINER_URL }}
+          token: ${{ secrets.PORTAINER_TOKEN }}
+          file: ${{ env.stack-file }}
+          name: ${{ env.stack-name }}
+          username: ${{ vars.GHCR_USER }}
+          password: ${{ secrets.GHCR_PASS }}
+          type: file
+          env_data: |
+            VERSION: "${{ env.version }}"
+            STACK_NAME: "${{ env.stack-name }}"
+            TRAEFIK_HOST: "${{ env.traefik-host }}"
+            BASIC_AUTH: "${{ secrets.BASIC_AUTH }}"
+            GOOGLE_GENERATIVE_AI_API_KEY: "${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}"
+            OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+            MODEL: "${{ secrets.MODEL }}"
+            CORS_ORIGINS: "${{ env.origins }}"
+            MAX_TOKENS: "2048"
+
+      ## https://render.com/docs/deploy-hooks#deploying-from-an-image-registry
+      #- name: "Deploy Image"
+      #  uses: cssnr/web-request-action@v2
+      #  continue-on-error: true
+      #  env:
+      #    version: ${{ env.version == 'master' && 'latest' || env.version }}
+      #  with:
+      #    url: ${{ secrets.RENDER_HOOK }}
+      #    params: |
+      #      imgURL: ghcr.io/${{ github.repository }}:${{ env.version }}

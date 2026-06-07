@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: ghcr.io/cssnr/docker-nginx-proxy:latest
+    env_file: settings.env
+    environment:
+      SERVICE_NAME: "app"
+      SERVICE_PORT: "3000"
+      #BASIC_AUTH: ${BASIC_AUTH}
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 64M
+    depends_on:
+      - app
+    ports:
+      - "${PORT:-80}:80"
+
+  app:
+    build:
+      context: .
+    image: chat-server:latest
+    command: "npm run dev"
+    env_file: settings.env
+    environment:
+      DEBUG: "app:*"
+      #VERSION: ${VERSION}
+      #STACK_NAME: ${STACK_NAME}
+      #TRAEFIK_HOST: ${TRAEFIK_HOST}
+      #MODEL: ${MODEL}
+      #OPENAI_API_KEY: ${OPENAI_API_KEY}
+      #GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY}
+      #MAX_TOKENS: ${MAX_TOKENS}
+      #INSTRUCTIONS: ${INSTRUCTIONS}
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 256M
+    #volumes:
+    #  - ${APP_FILES:-./src}:/app/src
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: rebuild
+          path: ./package-lock.json
+        - action: rebuild
+          path: ./docker-compose-dev.yaml

@@ -1,0 +1,121 @@
+name: "Build"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Extra Tags: comma,separated"
+      dev:
+        description: "Development Build"
+        type: boolean
+        default: true
+  #release:
+  #  types: [published]
+
+env:
+  dev: ${{ (inputs.dev || github.event.release.prerelease) && 'dev' || '' }}
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: write
+      packages: write
+
+    environment:
+      name: ghcr
+      url: https://github.com/cssnr/chat-server/pkgs/container/chat-server
+
+    steps:
+      - name: "Debug CTX github"
+        if: ${{ !github.event.act }}
+        continue-on-error: true
+        env:
+          GITHUB_CTX: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CTX"
+
+      - name: "Debug"
+        continue-on-error: true
+        run: |
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "inputs.tags: ${{ inputs.tags }}"
+          echo "inputs.dev: ${{ inputs.dev }}"
+          echo "env.dev: ${{ env.dev }}"
+
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Docker Login"
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ vars.GHCR_USER }}
+          password: ${{ secrets.GHCR_PASS }}
+
+      - name: "Setup QEMU"
+        uses: docker/setup-qemu-action@v4
+
+      - name: "Setup Buildx"
+        uses: docker/setup-buildx-action@v4
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: "Update Version Tags"
+        id: version
+        uses: cssnr/update-version-tags-action@v2
+        with:
+          prefix: ""
+          dry_run: true
+          tags: |
+            ${{ inputs.tags }}
+
+      - name: "Debug Version Tags"
+        continue-on-error: true
+        run: |
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "tags1: ${{ env.dev }}"
+          echo "tags2: ${{ steps.version.outputs.tags }}"
+          echo "tags3: ${{ inputs.tags }}"
+
+      - name: "Generate Docker Tags"
+        id: tags
+        uses: cssnr/docker-tags-action@v2
+        with:
+          images: "ghcr.io/${{ github.repository }}"
+          tags: |
+            ${{ env.dev }}
+            ${{ steps.version.outputs.tags }}
+            ${{ inputs.tags }}
+
+      - name: "Debug Docker Tags"
+        continue-on-error: true
+        run: |
+          echo "github.ref_name: ${{ github.ref_name }}"
+          echo "tags: ${{ steps.tags.outputs.tags }}"
+          echo "labels: ${{ steps.tags.outputs.labels }}"
+          echo "annotations: ${{ steps.tags.outputs.annotations }}"
+
+      - name: "Build and Push"
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: ${{ steps.tags.outputs.labels }}
+          annotations: ${{ steps.tags.outputs.annotations }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ github.ref_name }}
+
+      - name: "Send Failure Notification"
+        if: ${{ failure() }}
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          description: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

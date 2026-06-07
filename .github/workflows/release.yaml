@@ -1,0 +1,40 @@
+name: "Release"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: "Release"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: "Update Release Notes Action"
+        continue-on-error: true
+        uses: smashedr/update-release-notes-action@master
+        with:
+          location: tail
+
+      - name: "Package Changelog Action"
+        continue-on-error: true
+        uses: cssnr/package-changelog-action@v2
+
+  build:
+    name: "Build"
+    uses: ./.github/workflows/build.yaml
+    needs: release
+    secrets: inherit
+    permissions:
+      contents: write
+      packages: write
+
+  deploy:
+    name: "Deploy"
+    uses: ./.github/workflows/deploy.yaml
+    needs: build
+    secrets: inherit
