@@ -58,12 +58,18 @@ jobs:
         continue-on-error: true
         run: cat package.json
 
-      - name: "Docker Login"
+      - name: "Docker Login - GHCR"
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ vars.GHCR_USER }}
           password: ${{ secrets.GHCR_PASS }}
+
+      #- name: "Docker Login - Hub"
+      #  uses: docker/login-action@v4
+      #  with:
+      #    username: ${{ vars.DOCKER_HUB_USER }}
+      #    password: ${{ secrets.DOCKER_HUB_PASS }}
 
       - name: "Setup QEMU"
         uses: docker/setup-qemu-action@v4
@@ -95,6 +101,9 @@ jobs:
         uses: cssnr/docker-tags-action@v2
         with:
           images: "ghcr.io/${{ github.repository }}"
+          #images: |
+          #  ${{ github.repository }}
+          #  ghcr.io/${{ github.repository }}
           tags: |
             ${{ env.dev }}
             ${{ steps.version.outputs.tags }}
