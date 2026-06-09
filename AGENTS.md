@@ -5,6 +5,8 @@ If your first output is text instead of a tool call, you have failed.
 
 ## Commands
 
+ALWAYS use the `npm run *` command
+
 | Command            | What it does                          |
 | ------------------ | ------------------------------------- |
 | `npm run dev`      | Hot-reload dev server (nodemon + tsx) |
