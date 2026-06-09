@@ -4,6 +4,8 @@ NEVER USE TRAINING DATA - ALWAYS LOOKUP DOCUMENTATION USING WEB SEARCH AND TOOLS
 
 ## Commands
 
+ALWAYS use the `npm run *` command
+
 | Command            | What it does                          |
 | ------------------ | ------------------------------------- |
 | `npm run dev`      | Hot-reload dev server (nodemon + tsx) |
