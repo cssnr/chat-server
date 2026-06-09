@@ -78,7 +78,7 @@ jobs:
             OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
             MODEL: "${{ secrets.MODEL }}"
             CORS_ORIGINS: "${{ env.origins }}"
-            PROVIDER_OPTIONS: "${{ env.options }}"
+            PROVIDER_OPTIONS: '${{ env.options }}'
             MAX_TOKENS: "${{ env.tokens }}"
 
       ## https://render.com/docs/deploy-hooks#deploying-from-an-image-registry
