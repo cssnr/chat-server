@@ -1,8 +1,11 @@
 # Chat Server — Agent Guide
 
-NEVER USE TRAINING DATA - ALWAYS LOOKUP DOCUMENTATION USING WEB SEARCH AND TOOLS
+Before answering any question that involves facts about ANYTHING, you MUST output at least one Read, WebFetch, or WebSearch tool call.
+If your first output is text instead of a tool call, you have failed.
 
 ## Commands
+
+ALWAYS use the `npm run *` command
 
 | Command            | What it does                          |
 | ------------------ | ------------------------------------- |

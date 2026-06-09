@@ -7,7 +7,7 @@ on:
 jobs:
   issue:
     name: "Issue"
-    if: ${{ !contains(github.event.issue.labels.*.name, 'enhancement') }}
+    if: ${{ !github.event.issue.type || github.event.issue.type.name == 'Bug' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -23,7 +23,7 @@ jobs:
         id: app
         uses: actions/create-github-app-token@v3
         with:
-          client-id: 146360
+          client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: "AI Issue"
