@@ -16,12 +16,12 @@
     "tsc": "npx tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.81",
+    "@ai-sdk/anthropic": "^3.0.82",
     "@ai-sdk/google": "^3.0.80",
-    "@ai-sdk/openai": "^3.0.68",
+    "@ai-sdk/openai": "^3.0.69",
     "@ai-sdk/openai-compatible": "^2.0.48",
-    "@ai-sdk/vue": "^3.0.197",
-    "ai": "^6.0.197",
+    "@ai-sdk/vue": "^3.0.199",
+    "ai": "^6.0.199",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -35,9 +35,9 @@
     "@types/picomatch": "^4.0.3",
     "eslint": "^10.4.1",
     "nodemon": "^3.1.14",
-    "prettier": "^3.8.3",
+    "prettier": "^3.8.4",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.1"
+    "typescript-eslint": "^8.61.0"
   }
 }

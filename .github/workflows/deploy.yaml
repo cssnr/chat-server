@@ -19,6 +19,8 @@ env:
   stack-name: ${{ github.repository_owner }}-${{ github.event.repository.name }}
   version: ${{ inputs.version || github.event.workflow_run.head_branch || github.ref_name }}
   origins: "*.cssnr.com,cssnr.github.io,smashedr.github.io,django-files.github.io"
+  options: '{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}'
+  tokens: "2048"
 
 jobs:
   deploy:
@@ -56,7 +58,7 @@ jobs:
           echo "env.version: ${{ env.version }}"
 
       - name: "Portainer Deploy"
-        uses: cssnr/portainer-stack-deploy-action@v1
+        uses: cssnr/portainer-stack-deploy-action@v2
         env:
           version: ${{ env.version == 'master' && 'latest' || env.version }}
         with:
@@ -76,7 +78,8 @@ jobs:
             OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
             MODEL: "${{ secrets.MODEL }}"
             CORS_ORIGINS: "${{ env.origins }}"
-            MAX_TOKENS: "2048"
+            PROVIDER_OPTIONS: "${{ env.options }}"
+            MAX_TOKENS: "${{ env.tokens }}"
 
       ## https://render.com/docs/deploy-hooks#deploying-from-an-image-registry
       #- name: "Deploy Image"
