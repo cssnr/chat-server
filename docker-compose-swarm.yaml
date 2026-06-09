@@ -48,6 +48,7 @@ services:
       GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY}
       PROVIDER_API_KEY: ${PROVIDER_API_KEY}
       BASE_URL: ${BASE_URL}
+      PROVIDER_OPTIONS: ${PROVIDER_OPTIONS}
     deploy:
       replicas: 1
       resources:
