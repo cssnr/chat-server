@@ -46,7 +46,7 @@ console.log(`INSTRUCTIONS: ${process.env.INSTRUCTIONS}`)
 const model = getModel()
 console.log(`Loaded modelId: ${model.modelId}`)
 
-const providerOptions = getProviderOptions(model.modelId)
+const providerOptions = getProviderOptions()
 console.log('providerOptions:', providerOptions)
 
 const app = express()
@@ -117,18 +117,11 @@ function getModel() {
   }
 }
 
-function getProviderOptions(modelId: string) {
-  let reasoningEffort = 'low'
-  if (/^gpt-5(-|$)/.test(modelId)) {
-    reasoningEffort = 'minimal'
-  } else if (modelId.startsWith('gpt-5.')) {
-    reasoningEffort = 'none'
-  }
-  return {
-    openai: {
-      serviceTier: 'flex',
-      reasoningEffort,
-      ...(modelId.includes('gpt-5-nano') && { include: ['reasoning.encrypted_content'] }),
-    },
+function getProviderOptions() {
+  if (!process.env.PROVIDER_OPTIONS) return
+  try {
+    return JSON.parse(process.env.PROVIDER_OPTIONS)
+  } catch {
+    console.error('parsing PROVIDER_OPTIONS as JSON')
   }
 }
