@@ -36,7 +36,7 @@ Works with Claude, Gemini, OpenAI, or any [OpenAI Compatible Provider](https://a
 
 💯 100% Free to use with Zen OpenCode or Gemini Free Tier!
 
-To get started [Setup](#setup) and [Configure](#configure) the server.
+To get started [Setup](#setup) and [Configure](#configure) the server. No API Key required!
 
 [![View Live Demo](https://img.shields.io/badge/view_live_demo-green?style=for-the-badge&logo=chatbot&logoColor=white)](https://cssnr.github.io/vitepress-chat/)
 
@@ -50,6 +50,7 @@ To get started [Setup](#setup) and [Configure](#configure) the server.
 - Automatic Input Token Caching
 - Automatic Retry on API Failures
 - Deploy with Docker or Node
+- Supports Multiple Clients Simultaneously
 - Plus all the [Client Features](https://github.com/cssnr/vitepress-chat?tab=readme-ov-file#features)
 
 Built with the [AI SDK](https://ai-sdk.dev/).

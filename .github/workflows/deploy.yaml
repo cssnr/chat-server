@@ -58,7 +58,7 @@ jobs:
           echo "env.version: ${{ env.version }}"
 
       - name: "Portainer Deploy"
-        uses: cssnr/portainer-stack-deploy-action@v1
+        uses: cssnr/portainer-stack-deploy-action@v2
         env:
           version: ${{ env.version == 'master' && 'latest' || env.version }}
         with:
