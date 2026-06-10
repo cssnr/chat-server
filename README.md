@@ -57,6 +57,8 @@ Built with the [AI SDK](https://ai-sdk.dev/).
 
 ## Setup
 
+💡 The server works out-of-the box with NO environment variables.
+
 [![Deploy to Render](https://img.shields.io/badge/Deploy_to_Render-4351E8?style=for-the-badge&logo=render)](https://render.com/deploy?repo=https://github.com/cssnr/chat-server)
 
 With Docker.
@@ -93,7 +95,7 @@ For a Portainer Deploy workflow see the [.github/workflows/deploy.yaml](https://
 
 ### Configure
 
-💡 The default `big-pickle` model works out-of-the box with NO API Key.
+💡 All variables are optional. The default `big-pickle` model works with NO API Key.
 
 Environment Variables.
 
