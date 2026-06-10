@@ -123,8 +123,14 @@ The `PROVIDER_API_KEY` is optional for free-tier models like `big-pickle`.
 
 Provider Specific Options: <https://vercel.com/docs/ai-gateway/models-and-providers/provider-options>
 
+For example, to disable "Reasoning" on `big-pickle` model.
+
+```json
+{ "zen": { "thinking": { "type": "disabled" } } }
+```
+
 ```text
-{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}
+PROVIDER_OPTIONS='{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}'
 ```
 
 You are responsible for providing valid options for the chosen model.
