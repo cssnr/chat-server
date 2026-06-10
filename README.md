@@ -167,6 +167,12 @@ The client is currently available as a VitePress Plugin.
 
 This works with no configuration using the `big-pickle` model.  
 You can set your environment variables in the `settings.env` file.  
+If using `big-pickle` for testing it is much faster to disable reasoning.
+
+```text
+PROVIDER_OPTIONS='{"zen":{"thinking":{"type":"disabled"}}}'
+```
+
 In all cases you can set the `PORT` environment variable.
 
 With Node run.
@@ -177,20 +183,13 @@ npm run dev
 
 Point your client to: http://localhost:3000/
 
-With Docker compose (you may need to `touch settings.env`).
+With Docker compose _(you may need to `touch settings.env`)_.
 
 ```shell
 docker compose -f docker-compose-dev.yaml up --watch --build --remove-orphans
 ```
 
 Point your client to: http://localhost/
-
-💡 If using `big-pickle` for testing it is much faster to disable reasoning.  
-To do so add the following to your `settings.env` file (or export it).
-
-```text
-PROVIDER_OPTIONS='{"zen":{"thinking":{"type":"disabled"}}}'
-```
 
 ### Building
 
