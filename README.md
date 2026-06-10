@@ -121,7 +121,7 @@ The `PROVIDER_API_KEY` is optional for free-tier models like `big-pickle`.
 
 #### PROVIDER_OPTIONS
 
-Provider Specific Options: <https://vercel.com/docs/ai-gateway/models-and-providers/provider-options>
+Provider Options: <https://vercel.com/docs/ai-gateway/models-and-providers/provider-options>
 
 For example, to disable "Reasoning" on `big-pickle` model.
 
@@ -136,7 +136,8 @@ PROVIDER_OPTIONS='{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}'
 ```
 
 You are responsible for providing valid options for the chosen model.
-It is only checked to be valid JSON at startup and will fail at runtime if invalid.
+The SDK supports providing provider options for multiple provider simultaneously.
+The value is only checked for valid JSON at startup and will fail at runtime if it contains invalid options.
 
 ## Client
 
@@ -183,7 +184,7 @@ docker compose -f docker-compose-dev.yaml up --watch --build --remove-orphans
 Point your client to: http://localhost/
 
 💡 If using `big-pickle` for testing it is much faster to disable reasoning.  
-Add the following to your `settings.env` file (or export it).
+To do so add the following to your `settings.env` file (or export it).
 
 ```text
 PROVIDER_OPTIONS='{"zen":{"thinking":{"type":"disabled"}}}'
