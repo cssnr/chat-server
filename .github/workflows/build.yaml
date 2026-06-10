@@ -27,12 +27,17 @@ jobs:
       packages: write
 
     environment:
-      name: ghcr
-      url: https://github.com/cssnr/chat-server/pkgs/container/chat-server
+      name: docker
+      url: https://hub.docker.com/r/cssnr/chat-server
 
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Debug event.json"
+        continue-on-error: true
+        run: cat "${GITHUB_EVENT_PATH}"
       - name: "Debug CTX github"
-        if: ${{ !github.event.act }}
         continue-on-error: true
         env:
           GITHUB_CTX: ${{ toJSON(github) }}
@@ -45,9 +50,6 @@ jobs:
           echo "inputs.tags: ${{ inputs.tags }}"
           echo "inputs.dev: ${{ inputs.dev }}"
           echo "env.dev: ${{ env.dev }}"
-
-      - name: "Checkout"
-        uses: actions/checkout@v6
 
       - name: "Update Package Version"
         uses: cssnr/update-json-value-action@v2
@@ -65,11 +67,11 @@ jobs:
           username: ${{ vars.GHCR_USER }}
           password: ${{ secrets.GHCR_PASS }}
 
-      #- name: "Docker Login - Hub"
-      #  uses: docker/login-action@v4
-      #  with:
-      #    username: ${{ vars.DOCKER_HUB_USER }}
-      #    password: ${{ secrets.DOCKER_HUB_PASS }}
+      - name: "Docker Login - Hub"
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASS }}
 
       - name: "Setup QEMU"
         uses: docker/setup-qemu-action@v4
@@ -100,10 +102,9 @@ jobs:
         id: tags
         uses: cssnr/docker-tags-action@v2
         with:
-          images: "ghcr.io/${{ github.repository }}"
-          #images: |
-          #  ${{ github.repository }}
-          #  ghcr.io/${{ github.repository }}
+          images: |
+            ${{ github.repository }}
+            ghcr.io/${{ github.repository }}
           tags: |
             ${{ env.dev }}
             ${{ steps.version.outputs.tags }}
