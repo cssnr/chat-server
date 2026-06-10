@@ -129,6 +129,8 @@ For example, to disable "Reasoning" on `big-pickle` model.
 { "zen": { "thinking": { "type": "disabled" } } }
 ```
 
+You may need to wrap the variable in single quotes.
+
 ```text
 PROVIDER_OPTIONS='{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}'
 ```
@@ -179,6 +181,13 @@ docker compose -f docker-compose-dev.yaml up --watch --build --remove-orphans
 ```
 
 Point your client to: http://localhost/
+
+💡 If using `big-pickle` for testing it is much faster to disable reasoning.  
+Add the following to your `settings.env` file (or export it).
+
+```text
+PROVIDER_OPTIONS='{"zen":{"thinking":{"type":"disabled"}}}'
+```
 
 ### Building
 
