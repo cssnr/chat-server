@@ -1,7 +1,7 @@
 [![GitHub Release Version](https://img.shields.io/github/v/release/cssnr/chat-server?logo=github)](https://github.com/cssnr/chat-server/releases/latest)
 [![Image Latest](https://badges.cssnr.com/ghcr/tags/cssnr/chat-server/latest)](https://github.com/cssnr/chat-server/pkgs/container/chat-server)
 [![Image Size](https://badges.cssnr.com/ghcr/size/cssnr/chat-server)](https://github.com/cssnr/chat-server/pkgs/container/chat-server)
-[![Deployment GHCR](https://img.shields.io/github/deployments/cssnr/chat-server/ghcr?logo=docker&logoColor=white&label=ghcr)](https://github.com/cssnr/chat-server/deployments/ghcr)
+[![Deployment Docker](https://img.shields.io/github/deployments/cssnr/chat-server/docker?logo=docker&logoColor=white&label=docker)](https://github.com/cssnr/chat-server/deployments/docker)
 [![Workflow Release](https://img.shields.io/github/actions/workflow/status/cssnr/chat-server/release.yaml?logo=norton&logoColor=white&label=release)](https://github.com/cssnr/chat-server/actions/workflows/release.yaml)
 [![Workflow Lint](https://img.shields.io/github/actions/workflow/status/cssnr/chat-server/lint.yaml?logo=norton&logoColor=white&label=lint)](https://github.com/cssnr/chat-server/actions/workflows/lint.yaml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/cssnr/chat-server?logo=listenhub&label=updated)](https://github.com/cssnr/chat-server/pulse)
@@ -100,12 +100,12 @@ Environment Variables.
 | Variable                              | Default                      | Description                         |
 | :------------------------------------ | :--------------------------- | :---------------------------------- |
 | `MODEL`                               | `big-pickle`                 | Model to Use                        |
-| `MAX_TOKENS`                          | -                            | Max Output Tokens                   |
+| `BASE_URL`                            | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
 | [PROVIDER_OPTIONS](#PROVIDER_OPTIONS) | -                            | Provider Options JSON String        |
+| `MAX_TOKENS`                          | -                            | Max Output Tokens                   |
 | `INSTRUCTIONS`                        | -                            | Fallback System Instructions        |
 | `AI_SDK_LOG_WARNINGS`                 | -                            | Disable SDK Warnings                |
 | `CORS_ORIGINS`                        | -                            | Allowed CORS Origins (supports \*)  |
-| `BASE_URL`                            | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
 | `PORT`                                | `3000`                       | Server Port                         |
 
 You must also set the API key for the `MODEL` you select.
