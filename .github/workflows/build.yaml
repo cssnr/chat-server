@@ -28,10 +28,16 @@ jobs:
 
     environment:
       name: docker
+      url: https://hub.docker.com/r/cssnr/chat-server
 
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+
+      - name: "Debug event.json"
+        continue-on-error: true
+        run: cat "${GITHUB_EVENT_PATH}"
       - name: "Debug CTX github"
-        if: ${{ !github.event.act }}
         continue-on-error: true
         env:
           GITHUB_CTX: ${{ toJSON(github) }}
@@ -44,9 +50,6 @@ jobs:
           echo "inputs.tags: ${{ inputs.tags }}"
           echo "inputs.dev: ${{ inputs.dev }}"
           echo "env.dev: ${{ env.dev }}"
-
-      - name: "Checkout"
-        uses: actions/checkout@v6
 
       - name: "Update Package Version"
         uses: cssnr/update-json-value-action@v2
