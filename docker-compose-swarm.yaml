@@ -33,7 +33,7 @@ services:
       - traefik-public
 
   app:
-    image: ghcr.io/cssnr/chat-server:${VERSION:-latest}
+    image: cssnr/chat-server:${VERSION:-latest}
     environment:
       VERSION: ${VERSION}
       STACK_NAME: ${STACK_NAME}

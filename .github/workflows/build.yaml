@@ -28,7 +28,7 @@ jobs:
 
     environment:
       name: docker
-      url: https://hub.docker.com/r/cssnr/chat-server
+      url: https://hub.docker.com/r/${{ github.repository }}
 
     steps:
       - name: "Checkout"
@@ -131,6 +131,14 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             VERSION=${{ github.ref_name }}
+
+      - name: "Docker Hub Description"
+        uses: peter-evans/dockerhub-description@v5
+        continue-on-error: true
+        with:
+          username: ${{ vars.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASS }}
+          repository: ${{ github.repository }}
 
       - name: "Send Failure Notification"
         if: ${{ failure() }}
