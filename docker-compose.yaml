@@ -20,7 +20,7 @@ services:
       - "${PORT:-80}:80"
 
   app:
-    image: ghcr.io/cssnr/chat-server:latest
+    image: cssnr/chat-server:latest
     env_file: settings.env
     #healthcheck:
     #  test: ["CMD-SHELL", "curl -sf localhost:3000/app-health-check || exit 1"]

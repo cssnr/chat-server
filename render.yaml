@@ -4,7 +4,7 @@ services:
     plan: free
     runtime: image
     image:
-      url: ghcr.io/cssnr/chat-server:latest
+      url: cssnr/chat-server:latest
     dockerCommand: npm start
     #healthCheckPath: /app-health-check
     envVars:
