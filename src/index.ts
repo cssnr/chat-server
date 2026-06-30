@@ -11,6 +11,7 @@ import {
   createUIMessageStream,
   pipeUIMessageStreamToResponse,
   convertToModelMessages,
+  toUIMessageStream,
 } from 'ai'
 
 dotenv.config({ path: 'settings.env' })
@@ -52,7 +53,7 @@ console.log('providerOptions:', providerOptions)
 const app = express()
 const port = process.env.PORT || 3000 // NOSONAR
 
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
 
 app.use(cors({ origin: corsCallback }))
 
@@ -76,7 +77,7 @@ app.post('/', async (req: Request, res: Response) => {
         maxOutputTokens,
         providerOptions,
       })
-      writer.merge(result.toUIMessageStream())
+      writer.merge(toUIMessageStream({ stream: result.stream }))
     },
   })
   // console.log('stream:', stream)
