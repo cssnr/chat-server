@@ -7,11 +7,14 @@ import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import {
+  Output,
   consumeStream,
+  pipeTextStreamToResponse,
   streamText,
   createUIMessageStream,
   pipeUIMessageStreamToResponse,
   convertToModelMessages,
+  toTextStream,
   toUIMessageStream,
 } from 'ai'
 
@@ -43,7 +46,11 @@ const maxOutputTokens = process.env.MAX_TOKENS
   ? Number.parseInt(process.env.MAX_TOKENS)
   : undefined
 console.log(`maxOutputTokens: ${maxOutputTokens}`)
-console.log(`INSTRUCTIONS: ${process.env.INSTRUCTIONS}`)
+console.log(
+  `CHAT_INSTRUCTIONS: ${process.env.INSTRUCTIONS || process.env.CHAT_INSTRUCTIONS}`, // NOSONAR
+)
+console.log(`COMPLETION_INSTRUCTIONS: ${process.env.COMPLETION_INSTRUCTIONS}`)
+console.log(`OBJECT_INSTRUCTIONS: ${process.env.OBJECT_INSTRUCTIONS}`)
 
 const model = getModel()
 console.log(`Loaded modelId: ${model.modelId}`)
@@ -74,7 +81,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
       const result = streamText({
         model: model,
         messages: modelMessages,
-        system: system || process.env.INSTRUCTIONS,
+        system: system || process.env.INSTRUCTIONS || process.env.CHAT_INSTRUCTIONS,
         maxOutputTokens,
         providerOptions,
       })
@@ -86,7 +93,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
 })
 
 app.post('/completion', async (req: Request, res: Response) => {
-  const { prompt, system, signal } = req.body
+  const { prompt, system } = req.body
   console.log('prompt:', prompt?.length, 'system:', system?.length)
   const result = streamText({
     model: model,
@@ -94,8 +101,7 @@ app.post('/completion', async (req: Request, res: Response) => {
     system: system || process.env.COMPLETION_INSTRUCTIONS,
     maxOutputTokens,
     providerOptions,
-    abortSignal: signal,
-    onError({ error }) {
+    onError(error) {
       console.log('error:', error)
     },
     onEnd({ finalStep, finishReason, text, usage }) {
@@ -114,6 +120,32 @@ app.post('/completion', async (req: Request, res: Response) => {
     response: res,
     stream,
     consumeSseStream: consumeStream,
+  })
+})
+
+app.post('/object', async (req: Request, res: Response) => {
+  const { outputSchema, prompt, system } = req.body
+  console.log('prompt:', prompt?.length, 'system:', system?.length)
+  const result = streamText({
+    model: model,
+    prompt,
+    system: system || process.env.OBJECT_INSTRUCTIONS,
+    maxOutputTokens,
+    providerOptions,
+    output: outputSchema ? Output.object({ schema: outputSchema }) : Output.json(),
+    onError(error) {
+      console.log('error:', error)
+    },
+    onEnd({ finalStep, finishReason, text, usage }) {
+      console.log('reasoning:', finalStep.reasoningText)
+      console.log('response:', text)
+      console.log('usage:', usage)
+      console.log('finishReason:', finishReason)
+    },
+  })
+  pipeTextStreamToResponse({
+    response: res,
+    stream: toTextStream({ stream: result.stream }),
   })
 })
 
