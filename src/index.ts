@@ -61,7 +61,7 @@ app.listen(port, () => console.log(`Listening on PORT: ${port}`))
 
 // app.get('/app-health-check', (_req, res) => res.sendStatus(200))
 
-app.post('/', async (req: Request, res: Response) => {
+app.post(['/', '/chat'], async (req: Request, res: Response) => {
   // console.log('req.headers:', req.headers)
   // console.log('authorization:', req.headers.authorization)
   const { messages, system } = req.body
@@ -81,6 +81,30 @@ app.post('/', async (req: Request, res: Response) => {
     },
   })
   // console.log('stream:', stream)
+  pipeUIMessageStreamToResponse({ response: res, stream })
+})
+
+app.post('/completion', async (req: Request, res: Response) => {
+  const { prompt, system } = req.body
+  console.log('prompt:', prompt.length, 'system:', system.length)
+  const result = streamText({
+    model: model,
+    prompt,
+    system: system || process.env.COMPLETION_INSTRUCTIONS,
+    maxOutputTokens,
+    providerOptions,
+    onEnd({ finishReason, finalStep, text, usage }) {
+      console.log('finishReason:', finishReason)
+      console.log('usage:', usage)
+      console.log('reasoning:', finalStep.reasoningText)
+      console.log('response:', text)
+    },
+  })
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      writer.merge(toUIMessageStream({ stream: result.stream }))
+    },
+  })
   pipeUIMessageStreamToResponse({ response: res, stream })
 })
 
