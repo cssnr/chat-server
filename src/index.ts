@@ -7,6 +7,7 @@ import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import {
+  consumeStream,
   streamText,
   createUIMessageStream,
   pipeUIMessageStreamToResponse,
@@ -85,19 +86,23 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
 })
 
 app.post('/completion', async (req: Request, res: Response) => {
-  const { prompt, system } = req.body
-  console.log('prompt:', prompt.length, 'system:', system.length)
+  const { prompt, system, signal } = req.body
+  console.log('prompt:', prompt?.length, 'system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
     system: system || process.env.COMPLETION_INSTRUCTIONS,
     maxOutputTokens,
     providerOptions,
-    onEnd({ finishReason, finalStep, text, usage }) {
-      console.log('finishReason:', finishReason)
-      console.log('usage:', usage)
+    abortSignal: signal,
+    onError({ error }) {
+      console.log('error:', error)
+    },
+    onEnd({ finalStep, finishReason, text, usage }) {
       console.log('reasoning:', finalStep.reasoningText)
       console.log('response:', text)
+      console.log('usage:', usage)
+      console.log('finishReason:', finishReason)
     },
   })
   const stream = createUIMessageStream({
@@ -105,7 +110,11 @@ app.post('/completion', async (req: Request, res: Response) => {
       writer.merge(toUIMessageStream({ stream: result.stream }))
     },
   })
-  pipeUIMessageStreamToResponse({ response: res, stream })
+  pipeUIMessageStreamToResponse({
+    response: res,
+    stream,
+    consumeSseStream: consumeStream,
+  })
 })
 
 function corsCallback(
