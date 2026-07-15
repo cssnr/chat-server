@@ -42,12 +42,13 @@ To get started [Setup](#setup) and [Configure](#configure) the server. No API Ke
 
 [![View Live Demo](https://img.shields.io/badge/view_live_demo-green?style=for-the-badge&logo=chatbot&logoColor=white)](https://cssnr.github.io/vitepress-chat/)
 
-- Client: https://github.com/cssnr/vitepress-chat
-- Server: https://github.com/cssnr/chat-server
+- Client: <https://github.com/cssnr/vitepress-chat>
+- Server: <https://github.com/cssnr/chat-server>
 
 ### Features
 
 - Works with Claude, OpenAI, Gemini and OpenAI Compatible Providers
+- Chat, Completion, and Object Endpoints
 - Live Stream Results to Client
 - Automatic Input Token Caching
 - Automatic Retry on API Failures
@@ -107,7 +108,9 @@ Environment Variables.
 | `BASE_URL`                            | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
 | [PROVIDER_OPTIONS](#PROVIDER_OPTIONS) | -                            | Provider Options JSON String        |
 | `MAX_TOKENS`                          | -                            | Max Output Tokens                   |
-| `INSTRUCTIONS`                        | -                            | Fallback System Instructions        |
+| `CHAT_INSTRUCTIONS`                   | -                            | System Instructions for Chat        |
+| `COMPLETION_INSTRUCTIONS`             | -                            | System Instructions for Completion  |
+| `OBJECT_INSTRUCTIONS`                 | -                            | System Instructions for Object      |
 | `AI_SDK_LOG_WARNINGS`                 | -                            | Disable SDK Warnings                |
 | `CORS_ORIGINS`                        | -                            | Allowed CORS Origins (supports \*)  |
 | `PORT`                                | `3000`                       | Server Port                         |
@@ -145,6 +148,16 @@ The value is only checked for valid JSON at startup and will fail at runtime if 
 
 ## Client
 
+### Endpoints
+
+| Endpoint      | Method | Description                                                                                                                            |
+| :------------ | :----: | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `/chat`       | `POST` | Use with [useChat](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) and [VitePress Chat](https://cssnr.github.io/vitepress-chat/) |
+| `/completion` | `POST` | Use with [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion)                                                   |
+| `/object`     | `POST` | Use with [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)                                                           |
+
+### Chat
+
 To send System Instructions from the client, add them to the body.
 
 ```typescript
@@ -157,11 +170,46 @@ const chat = new Chat({
 })
 ```
 
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
+
+### Completion
+
+```typescript
+import { useCompletion } from '@ai-sdk/react'
+
+const { completion, complete, isLoading, stop } = useCompletion({
+  api: 'https://chat-server.cssnr.com/completion',
+  headers: { Authorization: 'Basic Abc123=' },
+  body: { system: 'You are a helpful assistant.' },
+})
+```
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
+
+### Object
+
+```typescript
+import { useObject } from '@ai-sdk/react'
+
+const { object, submit } = useObject({
+  api: 'https://chat-server.cssnr.com/object',
+  schema: z.object({ name: z.string(), age: z.number() }),
+  headers: { Authorization: 'Basic Abc123=' },
+})
+
+submit({
+  system: 'You are a helpful assistant.',
+  prompt: 'Extract the name and age from: John is 30 years old.',
+})
+```
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object>
+
 ### VitePress Chat Plugin
 
 The client is currently available as a VitePress Plugin.
 
-- https://github.com/cssnr/vitepress-chat
+- <https://github.com/cssnr/vitepress-chat>
 
 [![View Documentation](https://img.shields.io/badge/view_documentation-blue?style=for-the-badge&logo=googledocs&logoColor=white)](https://cssnr.github.io/vitepress-chat/)
 

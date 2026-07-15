@@ -73,7 +73,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
   // console.log('req.headers:', req.headers)
   // console.log('authorization:', req.headers.authorization)
   const { messages, system } = req.body
-  // if (system) console.log('system:', system.substring(0, 512))
+  // console.log('system:', system?.substring(0, 512))
   const modelMessages = await convertToModelMessages(messages)
   console.log('modelMessages:', modelMessages.length)
   const stream = createUIMessageStream({
@@ -94,7 +94,8 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
 
 app.post('/completion', async (req: Request, res: Response) => {
   const { prompt, system } = req.body
-  console.log('prompt:', prompt?.length, 'system:', system?.length)
+  console.log('prompt:', prompt?.length)
+  console.log('system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
@@ -125,7 +126,9 @@ app.post('/completion', async (req: Request, res: Response) => {
 
 app.post('/object', async (req: Request, res: Response) => {
   const { outputSchema, prompt, system } = req.body
-  console.log('prompt:', prompt?.length, 'system:', system?.length)
+  console.log('outputSchema:', outputSchema?.length)
+  console.log('prompt:', prompt?.length)
+  console.log('system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
