@@ -48,12 +48,12 @@ To get started [Setup](#setup) and [Configure](#configure) the server. No API Ke
 ### Features
 
 - Works with Claude, OpenAI, Gemini and OpenAI Compatible Providers
-- Chat, Completion, and Object Endpoints
-- Live Stream Results to Client
+- Includes Chat, Completion, and Object Endpoints
+- Supports Multiple Clients Simultaneously
+- Live Streams the Results to the Client
 - Automatic Input Token Caching
 - Automatic Retry on API Failures
 - Deploy with Docker or Node
-- Supports Multiple Clients Simultaneously
 - Plus all the [Client Features](https://github.com/cssnr/vitepress-chat?tab=readme-ov-file#features)
 
 Built with the [AI SDK](https://ai-sdk.dev/).
@@ -116,6 +116,8 @@ Environment Variables.
 | `PORT`                                | `3000`                       | Server Port                         |
 | `DEBUG`                               | -                            | Set to `app` for debug logs         |
 
+Note: The `INSTRUCTIONS` variable also points to the `CHAT_INSTRUCTIONS` variable (recommended).
+
 You must also set the API key for the `MODEL` you select.
 
 | Variable                       | Description                |
@@ -157,12 +159,17 @@ The value is only checked for valid JSON at startup and will fail at runtime if 
 | `/completion` | `POST` | Use with [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion)                                                   |
 | `/object`     | `POST` | Use with [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)                                                           |
 
+Note: The `/` endpoint also points to the `/chat` endpoint (recommended).
+
 ### Chat
 
 To send System Instructions from the client, add them to the body.
 
 ```typescript
-const chat = new Chat({
+import { useChat } from '@ai-sdk/vue'
+import { DefaultChatTransport } from 'ai'
+
+const { messages, input, handleSubmit } = useChat({
   transport: new DefaultChatTransport({
     api: 'https://chat-server.cssnr.com/chat',
     headers: { Authorization: 'Basic Abc123=' },
@@ -176,7 +183,7 @@ Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
 ### Completion
 
 ```typescript
-import { useCompletion } from '@ai-sdk/react'
+import { useCompletion } from '@ai-sdk/vue'
 
 const { completion, complete, isLoading, stop } = useCompletion({
   api: 'https://chat-server.cssnr.com/completion',
@@ -190,7 +197,7 @@ Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
 ### Object
 
 ```typescript
-import { useObject } from '@ai-sdk/react'
+import { useObject } from '@ai-sdk/vue'
 
 const { object, submit } = useObject({
   api: 'https://chat-server.cssnr.com/object',
