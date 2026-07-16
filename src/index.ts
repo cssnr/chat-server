@@ -81,6 +81,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
   // debug('req.headers:', req.headers)
   // debug('authorization:', req.headers.authorization)
   const { messages, system } = req.body
+  debug('system:', system?.length)
   // debug('system:', system?.substring(0, 128))
   const modelMessages = await convertToModelMessages(messages)
   debug('modelMessages:', modelMessages.length)
