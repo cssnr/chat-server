@@ -114,6 +114,7 @@ Environment Variables.
 | `AI_SDK_LOG_WARNINGS`                 | -                            | Disable SDK Warnings                |
 | `CORS_ORIGINS`                        | -                            | Allowed CORS Origins (supports \*)  |
 | `PORT`                                | `3000`                       | Server Port                         |
+| `DEBUG`                               | -                            | Set to `app` for debug logs         |
 
 You must also set the API key for the `MODEL` you select.
 

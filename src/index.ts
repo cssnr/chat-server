@@ -1,3 +1,4 @@
+import createDebug from 'debug'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import pm from 'picomatch'
@@ -22,9 +23,14 @@ import {
 
 dotenv.config({ path: 'settings.env' })
 
+console.log(`DEBUG: ${process.env.DEBUG}`)
+createDebug.enable(process.env.DEBUG ?? '')
+const debug = createDebug('app')
+debug('debug enabled: app')
+
 console.log(`chat-server: ${process.env.APP_VERSION}`)
 
-console.log('MODEL:', process.env.MODEL ? 'SET' : undefined)
+console.log('MODEL:', process.env.MODEL)
 console.log('ANTHROPIC_API_KEY:', process.env.ANTHROPIC_API_KEY ? 'SET' : undefined)
 console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : undefined)
 console.log(
@@ -72,12 +78,12 @@ app.listen(port, () => console.log(`Listening on PORT: ${port}`))
 // app.get('/app-health-check', (_req, res) => res.sendStatus(200))
 
 app.post(['/', '/chat'], async (req: Request, res: Response) => {
-  // console.log('req.headers:', req.headers)
-  // console.log('authorization:', req.headers.authorization)
+  // debug('req.headers:', req.headers)
+  // debug('authorization:', req.headers.authorization)
   const { messages, system } = req.body
-  // console.log('system:', system?.substring(0, 512))
+  // debug('system:', system?.substring(0, 128))
   const modelMessages = await convertToModelMessages(messages)
-  // console.log('modelMessages:', modelMessages.length)
+  debug('modelMessages:', modelMessages.length)
   const stream = createUIMessageStream({
     execute: ({ writer }) => {
       const result = streamText({
@@ -92,14 +98,13 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
       writer.merge(toUIMessageStream({ stream: result.stream }))
     },
   })
-  // console.log('stream:', stream)
   pipeUIMessageStreamToResponse({ response: res, stream })
 })
 
 app.post('/completion', async (req: Request, res: Response) => {
   const { prompt, system } = req.body
-  console.log('prompt:', prompt?.length)
-  console.log('system:', system?.length)
+  debug('prompt:', prompt?.length)
+  debug('system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
@@ -123,9 +128,9 @@ app.post('/completion', async (req: Request, res: Response) => {
 
 app.post('/object', async (req: Request, res: Response) => {
   const { output, prompt, system } = req.body
-  console.log('output:', output ? 'SET' : undefined)
-  console.log('prompt:', prompt?.length)
-  console.log('system:', system?.length)
+  debug('output:', output?.length)
+  debug('prompt:', prompt?.length)
+  debug('system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
@@ -186,12 +191,12 @@ function getProviderOptions() {
 }
 
 function onStreamError(error: unknown) {
-  console.log('error:', error)
+  console.error('error:', error)
 }
 
 function onStreamEnd({ finalStep, finishReason, text, usage }: GenerateTextEndEvent) {
-  console.log('reasoning:', finalStep.reasoningText)
-  console.log('response:', text)
-  console.log('usage:', usage)
-  console.log('finishReason:', finishReason)
+  debug('reasoning:', finalStep.reasoningText)
+  debug('response:', text)
+  debug('usage:', usage)
+  debug('finishReason:', finishReason)
 }
