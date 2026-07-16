@@ -100,7 +100,7 @@ For a Portainer Deploy workflow see the [.github/workflows/deploy.yaml](https://
 
 💡 All variables are optional. The default `big-pickle` model works with NO API Key.
 
-Environment Variables.
+Environment Variables (can be placed in a `settings.env` file).
 
 | Variable                              | Default                      | Description                         |
 | :------------------------------------ | :--------------------------- | :---------------------------------- |
@@ -161,7 +161,7 @@ The value is only checked for valid JSON at startup and will fail at runtime if 
 
 Note: The `/` endpoint also points to the `/chat` endpoint (recommended).
 
-### Chat
+#### chat
 
 To send System Instructions from the client, add them to the body.
 
@@ -180,7 +180,7 @@ const { messages, input, handleSubmit } = useChat({
 
 Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
 
-### Completion
+#### completion
 
 ```typescript
 import { useCompletion } from '@ai-sdk/vue'
@@ -194,7 +194,7 @@ const { completion, complete, isLoading, stop } = useCompletion({
 
 Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
 
-### Object
+#### object
 
 ```typescript
 import { useObject } from '@ai-sdk/vue'
@@ -215,6 +215,8 @@ submit({
 })
 ```
 
+Note: Both `system` and `output` are custom body parameters parsed by the server allowing the client to send these items.
+
 Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object>
 
 ### VitePress Chat Plugin
@@ -226,6 +228,8 @@ The client is currently available as a VitePress Plugin.
 [![View Documentation](https://img.shields.io/badge/view_documentation-blue?style=for-the-badge&logo=googledocs&logoColor=white)](https://cssnr.github.io/vitepress-chat/)
 
 ## Development
+
+To enable debug logs set: `DEBUG=app`
 
 This works with no configuration using the `big-pickle` model.  
 You can set your environment variables in the `settings.env` file.  
