@@ -7,14 +7,15 @@ import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import {
+  type GenerateTextEndEvent,
   Output,
   consumeStream,
+  convertToModelMessages,
+  createUIMessageStream,
   jsonSchema,
   pipeTextStreamToResponse,
-  streamText,
-  createUIMessageStream,
   pipeUIMessageStreamToResponse,
-  convertToModelMessages,
+  streamText,
   toTextStream,
   toUIMessageStream,
 } from 'ai'
@@ -76,7 +77,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
   const { messages, system } = req.body
   // console.log('system:', system?.substring(0, 512))
   const modelMessages = await convertToModelMessages(messages)
-  console.log('modelMessages:', modelMessages.length)
+  // console.log('modelMessages:', modelMessages.length)
   const stream = createUIMessageStream({
     execute: ({ writer }) => {
       const result = streamText({
@@ -85,6 +86,8 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
         system: system || process.env.INSTRUCTIONS || process.env.CHAT_INSTRUCTIONS,
         maxOutputTokens,
         providerOptions,
+        onError: onStreamError,
+        onEnd: onStreamEnd,
       })
       writer.merge(toUIMessageStream({ stream: result.stream }))
     },
@@ -103,15 +106,8 @@ app.post('/completion', async (req: Request, res: Response) => {
     system: system || process.env.COMPLETION_INSTRUCTIONS,
     maxOutputTokens,
     providerOptions,
-    onError(error) {
-      console.log('error:', error)
-    },
-    onEnd({ finalStep, finishReason, text, usage }) {
-      console.log('reasoning:', finalStep.reasoningText)
-      console.log('response:', text)
-      console.log('usage:', usage)
-      console.log('finishReason:', finishReason)
-    },
+    onError: onStreamError,
+    onEnd: onStreamEnd,
   })
   const stream = createUIMessageStream({
     execute: ({ writer }) => {
@@ -137,15 +133,8 @@ app.post('/object', async (req: Request, res: Response) => {
     maxOutputTokens,
     providerOptions,
     output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
-    onError(error) {
-      console.log('error:', error)
-    },
-    onEnd({ finalStep, finishReason, text, usage }) {
-      console.log('reasoning:', finalStep.reasoningText)
-      console.log('response:', text)
-      console.log('usage:', usage)
-      console.log('finishReason:', finishReason)
-    },
+    onError: onStreamError,
+    onEnd: onStreamEnd,
   })
   pipeTextStreamToResponse({
     response: res,
@@ -194,4 +183,15 @@ function getProviderOptions() {
   } catch {
     console.error('parsing PROVIDER_OPTIONS as JSON')
   }
+}
+
+function onStreamError(error: unknown) {
+  console.log('error:', error)
+}
+
+function onStreamEnd({ finalStep, finishReason, text, usage }: GenerateTextEndEvent) {
+  console.log('reasoning:', finalStep.reasoningText)
+  console.log('response:', text)
+  console.log('usage:', usage)
+  console.log('finishReason:', finishReason)
 }
