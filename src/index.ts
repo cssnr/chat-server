@@ -9,6 +9,7 @@ import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import {
   Output,
   consumeStream,
+  jsonSchema,
   pipeTextStreamToResponse,
   streamText,
   createUIMessageStream,
@@ -125,8 +126,8 @@ app.post('/completion', async (req: Request, res: Response) => {
 })
 
 app.post('/object', async (req: Request, res: Response) => {
-  const { outputSchema, prompt, system } = req.body
-  console.log('outputSchema:', outputSchema?.length)
+  const { output, prompt, system } = req.body
+  console.log('output:', output ? 'SET' : undefined)
   console.log('prompt:', prompt?.length)
   console.log('system:', system?.length)
   const result = streamText({
@@ -135,7 +136,7 @@ app.post('/object', async (req: Request, res: Response) => {
     system: system || process.env.OBJECT_INSTRUCTIONS,
     maxOutputTokens,
     providerOptions,
-    output: outputSchema ? Output.object({ schema: outputSchema }) : Output.json(),
+    output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
     onError(error) {
       console.log('error:', error)
     },

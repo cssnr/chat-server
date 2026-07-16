@@ -163,7 +163,7 @@ To send System Instructions from the client, add them to the body.
 ```typescript
 const chat = new Chat({
   transport: new DefaultChatTransport({
-    api: 'https://chat-server.cssnr.com/',
+    api: 'https://chat-server.cssnr.com/chat',
     headers: { Authorization: 'Basic Abc123=' },
     body: { system: 'You are a helpful assistant.' },
   }),
@@ -200,6 +200,10 @@ const { object, submit } = useObject({
 submit({
   system: 'You are a helpful assistant.',
   prompt: 'Extract the name and age from: John is 30 years old.',
+  output: {
+    type: 'object',
+    properties: { name: { type: 'string' }, age: { type: 'number' } },
+  },
 })
 ```
 
