@@ -15,3 +15,11 @@ ALWAYS use the `npm run *` command
 | `npm run lint`     | ESLint on `src/`                      |
 | `npm run tsc`      | TypeScript Check Only `tsc --noEmit`  |
 | `npm run prettier` | ALWAYS RUN AFTER EDITING FILES        |
+
+## Endpoints
+
+| Endpoint      | Links                                                                                   |
+| :------------ | :-------------------------------------------------------------------------------------- |
+| `/chat`       | Client Docs [useChat](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)             |
+| `/completion` | Client Docs [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion) |
+| `/object`     | Client Docs [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)         |

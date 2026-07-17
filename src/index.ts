@@ -30,6 +30,10 @@ debug('debug enabled: app')
 
 console.log(`chat-server: ${process.env.APP_VERSION}`)
 
+console.log('DISABLE_CHAT:', process.env.DISABLE_CHAT ? 'YES' : 'NO')
+console.log('DISABLE_COMPLETION:', process.env.DISABLE_COMPLETION ? 'YES' : 'NO')
+console.log('DISABLE_OBJECT:', process.env.DISABLE_OBJECT ? 'YES' : 'NO')
+
 console.log('MODEL:', process.env.MODEL)
 console.log('ANTHROPIC_API_KEY:', process.env.ANTHROPIC_API_KEY ? 'SET' : undefined)
 console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : undefined)
@@ -55,10 +59,10 @@ const maxOutputTokens = process.env.MAX_TOKENS
   : undefined
 console.log(`maxOutputTokens: ${maxOutputTokens}`)
 console.log(
-  `CHAT_INSTRUCTIONS: ${process.env.INSTRUCTIONS || process.env.CHAT_INSTRUCTIONS}`, // NOSONAR
+  `INSTRUCTIONS_CHAT: ${process.env.INSTRUCTIONS || process.env.INSTRUCTIONS_CHAT}`, // NOSONAR
 )
-console.log(`COMPLETION_INSTRUCTIONS: ${process.env.COMPLETION_INSTRUCTIONS}`)
-console.log(`OBJECT_INSTRUCTIONS: ${process.env.OBJECT_INSTRUCTIONS}`)
+console.log(`INSTRUCTIONS_COMPLETION: ${process.env.INSTRUCTIONS_COMPLETION}`)
+console.log(`INSTRUCTIONS_OBJECT: ${process.env.INSTRUCTIONS_OBJECT}`)
 
 const model = getModel()
 console.log(`Loaded modelId: ${model.modelId}`)
@@ -77,76 +81,82 @@ app.listen(port, () => console.log(`Listening on PORT: ${port}`))
 
 // app.get('/app-health-check', (_req, res) => res.sendStatus(200))
 
-app.post(['/', '/chat'], async (req: Request, res: Response) => {
-  // debug('req.headers:', req.headers)
-  // debug('authorization:', req.headers.authorization)
-  const { messages, system } = req.body
-  debug('system:', system?.length)
-  // debug('system:', system?.substring(0, 128))
-  const modelMessages = await convertToModelMessages(messages)
-  debug('modelMessages:', modelMessages.length)
-  const stream = createUIMessageStream({
-    execute: ({ writer }) => {
-      const result = streamText({
-        model: model,
-        messages: modelMessages,
-        system: system || process.env.INSTRUCTIONS || process.env.CHAT_INSTRUCTIONS,
-        maxOutputTokens,
-        providerOptions,
-        onError: onStreamError,
-        onEnd: onStreamEnd,
-      })
-      writer.merge(toUIMessageStream({ stream: result.stream }))
-    },
+if (!process.env.DISABLE_CHAT) {
+  app.post(['/', '/chat'], async (req: Request, res: Response) => {
+    // debug('req.headers:', req.headers)
+    // debug('authorization:', req.headers.authorization)
+    const { messages, system } = req.body
+    debug('system:', system?.length)
+    // debug('system:', system?.substring(0, 128))
+    const modelMessages = await convertToModelMessages(messages)
+    debug('modelMessages:', modelMessages.length)
+    const stream = createUIMessageStream({
+      execute: ({ writer }) => {
+        const result = streamText({
+          model: model,
+          messages: modelMessages,
+          system: system || process.env.INSTRUCTIONS || process.env.INSTRUCTIONS_CHAT,
+          maxOutputTokens,
+          providerOptions,
+          onError: onStreamError,
+          onEnd: onStreamEnd,
+        })
+        writer.merge(toUIMessageStream({ stream: result.stream }))
+      },
+    })
+    pipeUIMessageStreamToResponse({ response: res, stream })
   })
-  pipeUIMessageStreamToResponse({ response: res, stream })
-})
+}
 
-app.post('/completion', async (req: Request, res: Response) => {
-  const { prompt, system } = req.body
-  debug('prompt:', prompt?.length)
-  debug('system:', system?.length)
-  const result = streamText({
-    model: model,
-    prompt,
-    system: system || process.env.COMPLETION_INSTRUCTIONS,
-    maxOutputTokens,
-    providerOptions,
-    onError: onStreamError,
-    onEnd: onStreamEnd,
+if (!process.env.DISABLE_COMPLETION) {
+  app.post('/completion', async (req: Request, res: Response) => {
+    const { prompt, system } = req.body
+    debug('prompt:', prompt?.length)
+    debug('system:', system?.length)
+    const result = streamText({
+      model: model,
+      prompt,
+      system: system || process.env.INSTRUCTIONS_COMPLETION,
+      maxOutputTokens,
+      providerOptions,
+      onError: onStreamError,
+      onEnd: onStreamEnd,
+    })
+    const stream = createUIMessageStream({
+      execute: ({ writer }) => {
+        writer.merge(toUIMessageStream({ stream: result.stream }))
+      },
+    })
+    pipeUIMessageStreamToResponse({
+      response: res,
+      stream,
+      consumeSseStream: consumeStream,
+    })
   })
-  const stream = createUIMessageStream({
-    execute: ({ writer }) => {
-      writer.merge(toUIMessageStream({ stream: result.stream }))
-    },
-  })
-  pipeUIMessageStreamToResponse({
-    response: res,
-    stream,
-    consumeSseStream: consumeStream,
-  })
-})
+}
 
-app.post('/object', async (req: Request, res: Response) => {
-  const { output, prompt, system } = req.body
-  debug('output:', output?.length)
-  debug('prompt:', prompt?.length)
-  debug('system:', system?.length)
-  const result = streamText({
-    model: model,
-    prompt,
-    system: system || process.env.OBJECT_INSTRUCTIONS,
-    maxOutputTokens,
-    providerOptions,
-    output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
-    onError: onStreamError,
-    onEnd: onStreamEnd,
+if (!process.env.DISABLE_OBJECT) {
+  app.post('/object', async (req: Request, res: Response) => {
+    const { output, prompt, system } = req.body
+    debug('output:', output?.length)
+    debug('prompt:', prompt?.length)
+    debug('system:', system?.length)
+    const result = streamText({
+      model: model,
+      prompt,
+      system: system || process.env.INSTRUCTIONS_OBJECT,
+      maxOutputTokens,
+      providerOptions,
+      output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
+      onError: onStreamError,
+      onEnd: onStreamEnd,
+    })
+    pipeTextStreamToResponse({
+      response: res,
+      stream: toTextStream({ stream: result.stream }),
+    })
   })
-  pipeTextStreamToResponse({
-    response: res,
-    stream: toTextStream({ stream: result.stream }),
-  })
-})
+}
 
 function corsCallback(
   origin: string | undefined,
