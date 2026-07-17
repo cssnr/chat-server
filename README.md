@@ -167,6 +167,8 @@ Note: The `/` endpoint also points to the `/chat` endpoint (recommended).
 
 #### chat
 
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
+
 To send System Instructions from the client, add them to the body.
 
 ```typescript
@@ -182,9 +184,9 @@ const { messages, sendMessage, status, stop } = useChat({
 })
 ```
 
-Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
-
 #### completion
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
 
 ```typescript
 import { useCompletion } from '@ai-sdk/vue'
@@ -198,9 +200,9 @@ const { completion, complete, isLoading, stop } = useCompletion({
 await complete('Explain how to setup cssnr/chat-server')
 ```
 
-Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
-
 #### object
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object>
 
 ```typescript
 import { useObject } from '@ai-sdk/vue'
@@ -223,8 +225,6 @@ submit({
 ```
 
 Note: Both `system` and `output` are custom body parameters parsed by the server allowing the client to send these items.
-
-Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object>
 
 ### VitePress Chat Plugin
 
