@@ -172,7 +172,7 @@ To send System Instructions from the client, add them to the body.
 import { useChat } from '@ai-sdk/vue'
 import { DefaultChatTransport } from 'ai'
 
-const { messages, input, handleSubmit } = useChat({
+const { messages, sendMessage, status, stop } = useChat({
   transport: new DefaultChatTransport({
     api: 'https://chat-server.cssnr.com/chat',
     headers: { Authorization: 'Basic Abc123=' },
@@ -193,6 +193,8 @@ const { completion, complete, isLoading, stop } = useCompletion({
   headers: { Authorization: 'Basic Abc123=' },
   body: { system: 'You are a helpful assistant.' },
 })
+
+await complete('Explain how to setup cssnr/chat-server')
 ```
 
 Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
@@ -201,20 +203,21 @@ Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
 
 ```typescript
 import { useObject } from '@ai-sdk/vue'
+import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
+
+const schema = z.object({ name: z.string(), age: z.number() })
 
 const { object, submit } = useObject({
   api: 'https://chat-server.cssnr.com/object',
-  schema: z.object({ name: z.string(), age: z.number() }),
   headers: { Authorization: 'Basic Abc123=' },
+  schema,
 })
 
 submit({
   system: 'You are a helpful assistant.',
   prompt: 'Extract the name and age from: John is 30 years old.',
-  output: {
-    type: 'object',
-    properties: { name: { type: 'string' }, age: { type: 'number' } },
-  },
+  output: zodToJsonSchema(schema),
 })
 ```
 
