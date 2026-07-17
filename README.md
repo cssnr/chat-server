@@ -103,26 +103,24 @@ For a Portainer Deploy workflow see the [.github/workflows/deploy.yaml](https://
 
 Environment Variables (can be placed in a `settings.env` file).
 
-| Variable                              | Default                      | Description                         |
-| :------------------------------------ | :--------------------------- | :---------------------------------- |
-| `MODEL`                               | `big-pickle`                 | Model to Use                        |
-| `BASE_URL`                            | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
-| [PROVIDER_OPTIONS](#PROVIDER_OPTIONS) | -                            | Provider Options JSON String        |
-| `MAX_TOKENS`                          | -                            | Max Output Tokens                   |
-| `INSTRUCTIONS_CHAT`                   | -                            | System Instructions for Chat        |
-| `INSTRUCTIONS_COMPLETION`             | -                            | System Instructions for Completion  |
-| `INSTRUCTIONS_OBJECT`                 | -                            | System Instructions for Object      |
-| `DISABLE_CHAT`**¹**                   | -                            | Disable the `/chat` endpoint        |
-| `DISABLE_COMPLETION`**¹**             | -                            | Disable the `/completion` endpoint  |
-| `DISABLE_OBJECT`**¹**                 | -                            | Disable the `/object` endpoint      |
-| `AI_SDK_LOG_WARNINGS`**¹**            | -                            | Disable SDK Warnings                |
-| `CORS_ORIGINS`                        | -                            | Allowed CORS Origins (supports \*)  |
-| `PORT`                                | `3000`                       | Server Port                         |
-| `DEBUG`                               | -                            | Set to `app` for debug logs         |
+| Variable                                 | Default                      | Description                         |
+| :--------------------------------------- | :--------------------------- | :---------------------------------- |
+| `MODEL`                                  | `big-pickle`                 | Model to Use                        |
+| `BASE_URL`                               | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
+| [PROVIDER_OPTIONS](#PROVIDER_OPTIONS)    | -                            | Provider Options JSON String        |
+| `MAX_TOKENS`                             | -                            | Max Output Tokens                   |
+| [INSTRUCTIONS_CHAT](#INSTRUCTIONS)       | -                            | System Instructions for Chat        |
+| [INSTRUCTIONS_COMPLETION](#INSTRUCTIONS) | -                            | System Instructions for Completion  |
+| [INSTRUCTIONS_OBJECT](#INSTRUCTIONS)     | -                            | System Instructions for Object      |
+| `DISABLE_CHAT`**¹**                      | -                            | Disable the `/chat` Endpoint        |
+| `DISABLE_COMPLETION`**¹**                | -                            | Disable the `/completion` Endpoint  |
+| `DISABLE_OBJECT`**¹**                    | -                            | Disable the `/object` Endpoint      |
+| `AI_SDK_LOG_WARNINGS`**¹**               | -                            | Enable SDK Warnings Logging         |
+| `CORS_ORIGINS`                           | -                            | Allowed CORS Origins (supports \*)  |
+| `PORT`                                   | `3000`                       | Server Port                         |
+| `DEBUG`                                  | -                            | Set to `app` for Debug Logging      |
 
 > **¹** Boolean Variables. **True** values include: `['1', 't', 'true', 'y', 'yes', 'on']`
-
-The `INSTRUCTIONS` variable also points to the `INSTRUCTIONS_CHAT` variable (recommended).
 
 You must also set the API key for the `MODEL` you select.
 
@@ -134,6 +132,13 @@ You must also set the API key for the `MODEL` you select.
 | `PROVIDER_API_KEY`             | OpenAI Compatible Provider |
 
 The `PROVIDER_API_KEY` is optional for free-tier models like `big-pickle`.
+
+#### INSTRUCTIONS
+
+There are mechanisms to override the instructions per-call for all clients on all endpoints.  
+These are used as fallback when those instructions are not sent for configurations where this is desired.
+
+The `INSTRUCTIONS` variable (legacy) also points to the `INSTRUCTIONS_CHAT` variable (recommended).
 
 #### PROVIDER_OPTIONS
 
@@ -165,13 +170,11 @@ The value is only checked for valid JSON at startup and will fail at runtime if 
 | `/completion` | `POST` | Use with [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion)                                                   |
 | `/object`     | `POST` | Use with [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)                                                           |
 
-Note: The `/` endpoint also points to the `/chat` endpoint (recommended).
+Note: The `/` endpoint (legacy) also points to the `/chat` endpoint (recommended).
 
 #### chat
 
 Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
-
-To send System Instructions from the client, add them to the body.
 
 ```typescript
 import { useChat } from '@ai-sdk/vue'
@@ -185,6 +188,8 @@ const { messages, sendMessage, status, stop } = useChat({
   }),
 })
 ```
+
+To send System Instructions from the client, add them to the body.
 
 #### completion
 
@@ -201,6 +206,8 @@ const { completion, complete, isLoading, stop } = useCompletion({
 
 await complete('Explain how to set up cssnr/chat-server')
 ```
+
+To send System Instructions from the client, add them to the body.
 
 #### object
 
@@ -226,7 +233,9 @@ submit({
 })
 ```
 
-Note: Both `system` and `output` are custom body parameters parsed by the server allowing the client to send these items.
+To send System Instructions and Output Schema from the client, add them to the body.
+
+Note: Both `system` and `output` are custom body parameters parsed by the server.
 
 ### VitePress Chat Plugin
 
