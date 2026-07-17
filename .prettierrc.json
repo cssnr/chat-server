@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/prettierrc",
   "semi": false,
   "singleQuote": true,
-  "printWidth": 90,
+  "printWidth": 94,
   "overrides": [
     {
       "files": ["**/*.vue"],

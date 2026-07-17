@@ -112,15 +112,17 @@ Environment Variables (can be placed in a `settings.env` file).
 | `INSTRUCTIONS_CHAT`                   | -                            | System Instructions for Chat        |
 | `INSTRUCTIONS_COMPLETION`             | -                            | System Instructions for Completion  |
 | `INSTRUCTIONS_OBJECT`                 | -                            | System Instructions for Object      |
-| `DISABLE_CHAT`                        | -                            | Disable the `/chat` endpoint        |
-| `DISABLE_COMPLETION`                  | -                            | Disable the `/completion` endpoint  |
-| `DISABLE_OBJECT`                      | -                            | Disable the `/object` endpoint      |
-| `AI_SDK_LOG_WARNINGS`                 | -                            | Disable SDK Warnings                |
+| `DISABLE_CHAT`**¹**                   | -                            | Disable the `/chat` endpoint        |
+| `DISABLE_COMPLETION`**¹**             | -                            | Disable the `/completion` endpoint  |
+| `DISABLE_OBJECT`**¹**                 | -                            | Disable the `/object` endpoint      |
+| `AI_SDK_LOG_WARNINGS`**¹**            | -                            | Disable SDK Warnings                |
 | `CORS_ORIGINS`                        | -                            | Allowed CORS Origins (supports \*)  |
 | `PORT`                                | `3000`                       | Server Port                         |
 | `DEBUG`                               | -                            | Set to `app` for debug logs         |
 
-Note: The `INSTRUCTIONS` variable also points to the `INSTRUCTIONS_CHAT` variable (recommended).
+> **¹** Boolean Variables. **True** values include: `['1', 't', 'true', 'y', 'yes', 'on']`
+
+The `INSTRUCTIONS` variable also points to the `INSTRUCTIONS_CHAT` variable (recommended).
 
 You must also set the API key for the `MODEL` you select.
 
