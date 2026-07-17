@@ -26,6 +26,7 @@
 - [Setup](#setup)
   - [Configure](#configure)
 - [Client](#client)
+  - [Endpoints](#endpoints)
   - [VitePress Plugin](#vitepress-chat-plugin)
 - [Development](#development)
 - [Support](#support)
