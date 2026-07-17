@@ -61,7 +61,7 @@ Built with the [AI SDK](https://ai-sdk.dev/).
 
 ## Setup
 
-💡 The server works out-of-the box with NO environment variables.
+💡 The server works out-of-the-box with NO environment variables.
 
 [![Deploy to Render](https://img.shields.io/badge/Deploy_to_Render-4351E8?style=for-the-badge&logo=render)](https://render.com/deploy?repo=https://github.com/cssnr/chat-server)
 
@@ -150,7 +150,7 @@ PROVIDER_OPTIONS='{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}'
 ```
 
 You are responsible for providing valid options for the chosen model.
-The SDK supports providing provider options for multiple provider simultaneously.
+The SDK supports providing provider options for multiple providers simultaneously.
 The value is only checked for valid JSON at startup and will fail at runtime if it contains invalid options.
 
 ## Client
@@ -197,7 +197,7 @@ const { completion, complete, isLoading, stop } = useCompletion({
   body: { system: 'You are a helpful assistant.' },
 })
 
-await complete('Explain how to setup cssnr/chat-server')
+await complete('Explain how to set up cssnr/chat-server')
 ```
 
 #### object

@@ -1,9 +1,6 @@
 # Agent Guide
 
-Before answering any question that involves facts about ANYTHING, you MUST output at least one Read, WebFetch, or WebSearch tool call.
-If your first output is text instead of a tool call, you have failed.
-
-- [index.ts](src/index.ts) — Single source Express.js ai-sdk server with single route `/`
+- [index.ts](src/index.ts) — Single source Express.js AI-SDK server
 
 ## Commands
 
@@ -18,8 +15,8 @@ ALWAYS use the `npm run *` command
 
 ## Endpoints
 
-| Endpoint      | Links                                                                                   |
-| :------------ | :-------------------------------------------------------------------------------------- |
-| `/chat`       | Client Docs [useChat](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)             |
-| `/completion` | Client Docs [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion) |
-| `/object`     | Client Docs [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)         |
+| Server Endpoint                                                                               | Client                                                                      |
+| :-------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| [/chat](https://ai-sdk.dev/docs/reference/ai-sdk-ui/create-ui-message-stream)                 | [useChat](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)             |
+| [/completion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/pipe-ui-message-stream-to-response) | [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion) |
+| [/object](https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text)                          | [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)         |
