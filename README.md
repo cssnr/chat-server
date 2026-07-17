@@ -107,14 +107,15 @@ Environment Variables (can be placed in a `settings.env` file).
 | :--------------------------------------- | :--------------------------- | :---------------------------------- |
 | `MODEL`                                  | `big-pickle`                 | Model to Use                        |
 | `BASE_URL`                               | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
-| [PROVIDER_OPTIONS](#PROVIDER_OPTIONS)    | -                            | Provider Options JSON String        |
 | `MAX_TOKENS`                             | -                            | Max Output Tokens                   |
+| [PROVIDER_OPTIONS](#PROVIDER_OPTIONS)    | -                            | Provider Options JSON String        |
 | [INSTRUCTIONS_CHAT](#INSTRUCTIONS)       | -                            | System Instructions for Chat        |
 | [INSTRUCTIONS_COMPLETION](#INSTRUCTIONS) | -                            | System Instructions for Completion  |
 | [INSTRUCTIONS_OBJECT](#INSTRUCTIONS)     | -                            | System Instructions for Object      |
 | `DISABLE_CHAT`**¹**                      | -                            | Disable the `/chat` Endpoint        |
 | `DISABLE_COMPLETION`**¹**                | -                            | Disable the `/completion` Endpoint  |
 | `DISABLE_OBJECT`**¹**                    | -                            | Disable the `/object` Endpoint      |
+| `DISABLE_CLIENT_INSTRUCTIONS`**¹**       | -                            | Ignore Client System Instructions   |
 | `AI_SDK_LOG_WARNINGS`**¹**               | -                            | Enable SDK Warnings Logging         |
 | `CORS_ORIGINS`                           | -                            | Allowed CORS Origins (supports \*)  |
 | `PORT`                                   | `3000`                       | Server Port                         |
@@ -139,6 +140,8 @@ There are mechanisms to override the instructions per-call for all clients on al
 These are used as fallback when those instructions are not sent for configurations where this is desired.
 
 The `INSTRUCTIONS` variable (legacy) also points to the `INSTRUCTIONS_CHAT` variable (recommended).
+
+To disable the clients ability to send custom instructions set `DISABLE_CLIENT_INSTRUCTIONS=true`
 
 #### PROVIDER_OPTIONS
 

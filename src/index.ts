@@ -60,7 +60,11 @@ const maxOutputTokens = process.env.MAX_TOKENS
   : undefined
 console.log('maxOutputTokens:', maxOutputTokens)
 
-console.log('INSTRUCTIONS_CHAT:', process.env.INSTRUCTIONS || process.env.INSTRUCTIONS_CHAT) // NOSONAR
+const disableInstructions = getBool(process.env.DISABLE_CLIENT_INSTRUCTIONS)
+console.log('disableInstructions:', disableInstructions)
+
+process.env.INSTRUCTIONS_CHAT = process.env.INSTRUCTIONS_CHAT || process.env.INSTRUCTIONS // NOSONAR
+console.log('INSTRUCTIONS_CHAT:', process.env.INSTRUCTIONS_CHAT)
 console.log('INSTRUCTIONS_COMPLETION:', process.env.INSTRUCTIONS_COMPLETION)
 console.log('INSTRUCTIONS_OBJECT:', process.env.INSTRUCTIONS_OBJECT)
 
@@ -93,7 +97,7 @@ if (!getBool(process.env.DISABLE_CHAT)) {
         const result = streamText({
           model: model,
           messages: modelMessages,
-          system: system || process.env.INSTRUCTIONS || process.env.INSTRUCTIONS_CHAT,
+          system: (!disableInstructions && system) || process.env.INSTRUCTIONS_CHAT,
           maxOutputTokens,
           providerOptions,
           onError: onStreamError,
@@ -114,7 +118,7 @@ if (!getBool(process.env.DISABLE_COMPLETION)) {
     const result = streamText({
       model: model,
       prompt,
-      system: system || process.env.INSTRUCTIONS_COMPLETION,
+      system: (!disableInstructions && system) || process.env.INSTRUCTIONS_COMPLETION,
       maxOutputTokens,
       providerOptions,
       onError: onStreamError,
@@ -142,7 +146,7 @@ if (!getBool(process.env.DISABLE_OBJECT)) {
     const result = streamText({
       model: model,
       prompt,
-      system: system || process.env.INSTRUCTIONS_OBJECT,
+      system: (!disableInstructions && system) || process.env.INSTRUCTIONS_OBJECT,
       maxOutputTokens,
       providerOptions,
       output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
