@@ -92,7 +92,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
       const result = streamText({
         model: model,
         messages: modelMessages,
-        system: (!disableInstructions && system) || process.env.INSTRUCTIONS_CHAT,
+        instructions: (!disableInstructions && system) || process.env.INSTRUCTIONS_CHAT,
         maxOutputTokens,
         providerOptions,
         onError: onStreamError,
@@ -111,7 +111,7 @@ app.post('/completion', async (req: Request, res: Response) => {
   const result = streamText({
     model: model,
     prompt,
-    system: (!disableInstructions && system) || process.env.INSTRUCTIONS_COMPLETION,
+    instructions: (!disableInstructions && system) || process.env.INSTRUCTIONS_COMPLETION,
     maxOutputTokens,
     providerOptions,
     onError: onStreamError,
@@ -137,7 +137,7 @@ app.post('/object', async (req: Request, res: Response) => {
   const result = streamText({
     model: model,
     prompt,
-    system: (!disableInstructions && system) || process.env.INSTRUCTIONS_OBJECT,
+    instructions: (!disableInstructions && system) || process.env.INSTRUCTIONS_OBJECT,
     maxOutputTokens,
     providerOptions,
     output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
@@ -198,11 +198,11 @@ function getProviderOptions() {
   }
 }
 
-function onStreamError(error: unknown) {
+async function onStreamError({ error }: { error: unknown }) {
   console.error('error:', error)
 }
 
-function onStreamEnd({ finalStep, finishReason, text, usage }: GenerateTextEndEvent) {
+async function onStreamEnd({ finalStep, finishReason, text, usage }: GenerateTextEndEvent) {
   debug('reasoning:', finalStep.reasoningText)
   debug('response:', text)
   debug('usage:', usage)
