@@ -30,10 +30,6 @@ createDebug.enable(process.env.DEBUG ?? '')
 const debug = createDebug('app')
 debug('debug enabled: app')
 
-console.log('DISABLE_CHAT:', getBool(process.env.DISABLE_CHAT))
-console.log('DISABLE_COMPLETION:', getBool(process.env.DISABLE_COMPLETION))
-console.log('DISABLE_OBJECT:', getBool(process.env.DISABLE_OBJECT))
-
 console.log('MODEL:', process.env.MODEL)
 console.log('ANTHROPIC_API_KEY:', process.env.ANTHROPIC_API_KEY ? 'SET' : undefined)
 console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'SET' : undefined)
@@ -83,82 +79,76 @@ app.listen(port, () => console.log(`Listening on PORT: ${port}`))
 
 // app.get('/app-health-check', (_req, res) => res.sendStatus(200))
 
-if (!getBool(process.env.DISABLE_CHAT)) {
-  app.post(['/', '/chat'], async (req: Request, res: Response) => {
-    // debug('req.headers:', req.headers)
-    // debug('authorization:', req.headers.authorization)
-    const { messages, system } = req.body
-    debug('system:', system?.length)
-    // debug('system:', system?.substring(0, 128))
-    const modelMessages = await convertToModelMessages(messages)
-    debug('modelMessages:', modelMessages.length)
-    const stream = createUIMessageStream({
-      execute: ({ writer }) => {
-        const result = streamText({
-          model: model,
-          messages: modelMessages,
-          system: (!disableInstructions && system) || process.env.INSTRUCTIONS_CHAT,
-          maxOutputTokens,
-          providerOptions,
-          onError: onStreamError,
-          onEnd: onStreamEnd,
-        })
-        writer.merge(toUIMessageStream({ stream: result.stream }))
-      },
-    })
-    pipeUIMessageStreamToResponse({ response: res, stream })
+app.post(['/', '/chat'], async (req: Request, res: Response) => {
+  // debug('req.headers:', req.headers)
+  // debug('authorization:', req.headers.authorization)
+  const { messages, system } = req.body
+  debug('system:', system?.length)
+  // debug('system:', system?.substring(0, 128))
+  const modelMessages = await convertToModelMessages(messages)
+  debug('modelMessages:', modelMessages.length)
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      const result = streamText({
+        model: model,
+        messages: modelMessages,
+        system: (!disableInstructions && system) || process.env.INSTRUCTIONS_CHAT,
+        maxOutputTokens,
+        providerOptions,
+        onError: onStreamError,
+        onEnd: onStreamEnd,
+      })
+      writer.merge(toUIMessageStream({ stream: result.stream }))
+    },
   })
-}
+  pipeUIMessageStreamToResponse({ response: res, stream })
+})
 
-if (!getBool(process.env.DISABLE_COMPLETION)) {
-  app.post('/completion', async (req: Request, res: Response) => {
-    const { prompt, system } = req.body
-    debug('prompt:', prompt?.length)
-    debug('system:', system?.length)
-    const result = streamText({
-      model: model,
-      prompt,
-      system: (!disableInstructions && system) || process.env.INSTRUCTIONS_COMPLETION,
-      maxOutputTokens,
-      providerOptions,
-      onError: onStreamError,
-      onEnd: onStreamEnd,
-    })
-    const stream = createUIMessageStream({
-      execute: ({ writer }) => {
-        writer.merge(toUIMessageStream({ stream: result.stream }))
-      },
-    })
-    pipeUIMessageStreamToResponse({
-      response: res,
-      stream,
-      consumeSseStream: consumeStream,
-    })
+app.post('/completion', async (req: Request, res: Response) => {
+  const { prompt, system } = req.body
+  debug('prompt:', prompt?.length)
+  debug('system:', system?.length)
+  const result = streamText({
+    model: model,
+    prompt,
+    system: (!disableInstructions && system) || process.env.INSTRUCTIONS_COMPLETION,
+    maxOutputTokens,
+    providerOptions,
+    onError: onStreamError,
+    onEnd: onStreamEnd,
   })
-}
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      writer.merge(toUIMessageStream({ stream: result.stream }))
+    },
+  })
+  pipeUIMessageStreamToResponse({
+    response: res,
+    stream,
+    consumeSseStream: consumeStream,
+  })
+})
 
-if (!getBool(process.env.DISABLE_OBJECT)) {
-  app.post('/object', async (req: Request, res: Response) => {
-    const { output, prompt, system } = req.body
-    debug('output:', output?.length)
-    debug('prompt:', prompt?.length)
-    debug('system:', system?.length)
-    const result = streamText({
-      model: model,
-      prompt,
-      system: (!disableInstructions && system) || process.env.INSTRUCTIONS_OBJECT,
-      maxOutputTokens,
-      providerOptions,
-      output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
-      onError: onStreamError,
-      onEnd: onStreamEnd,
-    })
-    pipeTextStreamToResponse({
-      response: res,
-      stream: toTextStream({ stream: result.stream }),
-    })
+app.post('/object', async (req: Request, res: Response) => {
+  const { output, prompt, system } = req.body
+  debug('output:', output?.length)
+  debug('prompt:', prompt?.length)
+  debug('system:', system?.length)
+  const result = streamText({
+    model: model,
+    prompt,
+    system: (!disableInstructions && system) || process.env.INSTRUCTIONS_OBJECT,
+    maxOutputTokens,
+    providerOptions,
+    output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
+    onError: onStreamError,
+    onEnd: onStreamEnd,
   })
-}
+  pipeTextStreamToResponse({
+    response: res,
+    stream: toTextStream({ stream: result.stream }),
+  })
+})
 
 function getBool(value: string | undefined): boolean {
   if (!value) return false

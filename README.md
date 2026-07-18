@@ -112,9 +112,6 @@ Environment Variables (can be placed in a `settings.env` file).
 | [INSTRUCTIONS_CHAT](#INSTRUCTIONS)       | -                            | System Instructions for Chat        |
 | [INSTRUCTIONS_COMPLETION](#INSTRUCTIONS) | -                            | System Instructions for Completion  |
 | [INSTRUCTIONS_OBJECT](#INSTRUCTIONS)     | -                            | System Instructions for Object      |
-| `DISABLE_CHAT`**¹**                      | -                            | Disable the `/chat` Endpoint        |
-| `DISABLE_COMPLETION`**¹**                | -                            | Disable the `/completion` Endpoint  |
-| `DISABLE_OBJECT`**¹**                    | -                            | Disable the `/object` Endpoint      |
 | `DISABLE_CLIENT_INSTRUCTIONS`**¹**       | -                            | Ignore Client System Instructions   |
 | `AI_SDK_LOG_WARNINGS`**¹**               | -                            | Enable SDK Warnings Logging         |
 | `CORS_ORIGINS`                           | -                            | Allowed CORS Origins (supports \*)  |
