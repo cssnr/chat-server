@@ -184,7 +184,7 @@ const { messages, sendMessage, status, stop } = useChat({
   transport: new DefaultChatTransport({
     api: 'https://chat-server.cssnr.com/chat',
     headers: { Authorization: 'Basic Abc123=' },
-    body: { system: 'You are a helpful assistant.' },
+    body: { instructions: 'You are a helpful assistant.' },
   }),
 })
 ```
@@ -201,7 +201,7 @@ import { useCompletion } from '@ai-sdk/vue'
 const { completion, complete, isLoading, stop } = useCompletion({
   api: 'https://chat-server.cssnr.com/completion',
   headers: { Authorization: 'Basic Abc123=' },
-  body: { system: 'You are a helpful assistant.' },
+  body: { instructions: 'You are a helpful assistant.' },
 })
 
 await complete('Explain how to set up cssnr/chat-server')
@@ -227,7 +227,7 @@ const { object, submit } = useObject({
 })
 
 submit({
-  system: 'You are a helpful assistant.',
+  instructions: 'You are a helpful assistant.',
   prompt: 'Extract the name and age from: John is 30 years old.',
   output: zodToJsonSchema(schema),
 })
@@ -235,7 +235,7 @@ submit({
 
 To send System Instructions and Output Schema from the client, add them to the body.
 
-Note: Both `system` and `output` are custom body parameters parsed by the server.
+Note: Both `instructions` and `output` are custom body parameters parsed by the server.
 
 ### VitePress Chat Plugin
 

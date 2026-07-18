@@ -82,9 +82,9 @@ app.listen(port, () => console.log(`Listening on PORT: ${port}`))
 app.post(['/', '/chat'], async (req: Request, res: Response) => {
   // debug('req.headers:', req.headers)
   // debug('authorization:', req.headers.authorization)
-  const { messages, system } = req.body
-  debug('system:', system?.length)
-  // debug('system:', system?.substring(0, 128))
+  const { instructions, messages, system } = req.body
+  debug('instructions:', (instructions || system)?.length)
+  // debug('instructions:', (instructions || system)?.substring(0, 128))
   const modelMessages = await convertToModelMessages(messages)
   debug('modelMessages:', modelMessages.length)
   const stream = createUIMessageStream({
@@ -92,7 +92,8 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
       const result = streamText({
         model: model,
         messages: modelMessages,
-        instructions: (!disableInstructions && system) || process.env.INSTRUCTIONS_CHAT,
+        instructions:
+          (!disableInstructions && (instructions || system)) || process.env.INSTRUCTIONS_CHAT,
         maxOutputTokens,
         providerOptions,
         onError: onStreamError,
@@ -105,13 +106,14 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
 })
 
 app.post('/completion', async (req: Request, res: Response) => {
-  const { prompt, system } = req.body
+  const { instructions, prompt, system } = req.body
+  debug('instructions:', (instructions || system)?.length)
   debug('prompt:', prompt?.length)
-  debug('system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
-    instructions: (!disableInstructions && system) || process.env.INSTRUCTIONS_COMPLETION,
+    instructions:
+      (!disableInstructions && (instructions || system)) || process.env.INSTRUCTIONS_COMPLETION,
     maxOutputTokens,
     providerOptions,
     onError: onStreamError,
@@ -130,14 +132,15 @@ app.post('/completion', async (req: Request, res: Response) => {
 })
 
 app.post('/object', async (req: Request, res: Response) => {
-  const { output, prompt, system } = req.body
+  const { instructions, output, prompt, system } = req.body
+  debug('instructions:', (instructions || system)?.length)
   debug('output:', output?.length)
   debug('prompt:', prompt?.length)
-  debug('system:', system?.length)
   const result = streamText({
     model: model,
     prompt,
-    instructions: (!disableInstructions && system) || process.env.INSTRUCTIONS_OBJECT,
+    instructions:
+      (!disableInstructions && (instructions || system)) || process.env.INSTRUCTIONS_OBJECT,
     maxOutputTokens,
     providerOptions,
     output: output ? Output.object({ schema: jsonSchema(output) }) : Output.json(),
