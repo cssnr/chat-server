@@ -59,8 +59,8 @@ console.log('maxOutputTokens:', maxOutputTokens)
 const disableInstructions = getBool(process.env.DISABLE_CLIENT_INSTRUCTIONS)
 console.log('disableInstructions:', disableInstructions)
 
-process.env.INSTRUCTIONS_CHAT = process.env.INSTRUCTIONS_CHAT || process.env.INSTRUCTIONS // NOSONAR
-console.log('INSTRUCTIONS_CHAT:', process.env.INSTRUCTIONS_CHAT)
+const instructionsChat = process.env.INSTRUCTIONS_CHAT || process.env.INSTRUCTIONS // NOSONAR
+console.log('INSTRUCTIONS_CHAT:', instructionsChat)
 console.log('INSTRUCTIONS_COMPLETION:', process.env.INSTRUCTIONS_COMPLETION)
 console.log('INSTRUCTIONS_OBJECT:', process.env.INSTRUCTIONS_OBJECT)
 
@@ -92,8 +92,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
       const result = streamText({
         model: model,
         messages: modelMessages,
-        instructions:
-          (!disableInstructions && (instructions || system)) || process.env.INSTRUCTIONS_CHAT,
+        instructions: (!disableInstructions && (instructions || system)) || instructionsChat,
         maxOutputTokens,
         providerOptions,
         onError: onStreamError,
@@ -102,7 +101,7 @@ app.post(['/', '/chat'], async (req: Request, res: Response) => {
       writer.merge(toUIMessageStream({ stream: result.stream }))
     },
   })
-  pipeUIMessageStreamToResponse({ response: res, stream })
+  return pipeUIMessageStreamToResponse({ response: res, stream })
 })
 
 app.post('/completion', async (req: Request, res: Response) => {
@@ -124,7 +123,7 @@ app.post('/completion', async (req: Request, res: Response) => {
       writer.merge(toUIMessageStream({ stream: result.stream }))
     },
   })
-  pipeUIMessageStreamToResponse({
+  return pipeUIMessageStreamToResponse({
     response: res,
     stream,
     consumeSseStream: consumeStream,
@@ -134,7 +133,8 @@ app.post('/completion', async (req: Request, res: Response) => {
 app.post('/object', async (req: Request, res: Response) => {
   const { instructions, output, prompt, system } = req.body
   debug('instructions:', (instructions || system)?.length)
-  debug('output:', output?.length)
+  // NOTE: output is an Object due to - app.use(express.json({ limit: '10mb' }))
+  // debug('output:', output?.length)
   debug('prompt:', prompt?.length)
   const result = streamText({
     model: model,
@@ -147,7 +147,10 @@ app.post('/object', async (req: Request, res: Response) => {
     onError: onStreamError,
     onEnd: onStreamEnd,
   })
-  pipeTextStreamToResponse({
+  // NOTE: pipe the raw stream - erroring the stream here would create an unhandled
+  // rejection (crashing the process) and pipeTextStreamToResponse already sent a 200.
+  // Model errors are still logged via onError and the stream simply ends.
+  return pipeTextStreamToResponse({
     response: res,
     stream: toTextStream({ stream: result.stream }),
   })
@@ -182,11 +185,27 @@ function getModel() {
     if (!process.env.ANTHROPIC_API_KEY) throw new Error('Missing ANTHROPIC_API_KEY')
     return anthropic(process.env.MODEL)
   } else {
+    const isDefaultZen =
+      baseURL === 'https://opencode.ai/zen/v1' &&
+      !process.env.MODEL &&
+      !process.env.PROVIDER_API_KEY
+    debug('Applying Default Zen Headers:', isDefaultZen)
     const provider = createOpenAICompatible({
       name: 'zen',
       baseURL: baseURL,
       apiKey: process.env.PROVIDER_API_KEY,
       includeUsage: true,
+      ...(isDefaultZen
+        ? {
+            headers: {
+              'x-opencode-project': 'chat-server',
+              'x-opencode-session': 'ses_chat-server',
+              'x-opencode-request': 'chat-server',
+              'x-opencode-client': 'opencode-tui',
+              'User-Agent': 'opencode/1.14.50',
+            },
+          }
+        : {}),
     })
     return provider(process.env.MODEL || 'big-pickle') // NOSONAR
   }
