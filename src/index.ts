@@ -42,6 +42,9 @@ console.log('PROVIDER_API_KEY:', process.env.PROVIDER_API_KEY ? 'SET' : undefine
 const baseURL = process.env.BASE_URL || 'https://opencode.ai/zen/v1' // NOSONAR
 console.log('BASE_URL:', baseURL)
 
+const providerUserAgent = process.env.PROVIDER_USER_AGENT?.trim()
+console.log('PROVIDER_USER_AGENT:', providerUserAgent)
+
 console.log('AI_SDK_LOG_WARNINGS:', getBool(process.env.AI_SDK_LOG_WARNINGS))
 if (!getBool(process.env.AI_SDK_LOG_WARNINGS)) globalThis.AI_SDK_LOG_WARNINGS = false
 
@@ -189,23 +192,16 @@ function getModel() {
       baseURL === 'https://opencode.ai/zen/v1' &&
       !process.env.MODEL &&
       !process.env.PROVIDER_API_KEY
-    debug('Applying Default Zen Headers:', isDefaultZen)
+    debug('Default Zen Configuration:', isDefaultZen)
+    // NOTE: AI SDK appends a suffix to the UA: '<userAgent> ai-sdk/provider-utils/x runtime/node'
+    const userAgent = providerUserAgent ?? (isDefaultZen ? 'opencode/1.18.19' : undefined)
+    debug('User-Agent:', userAgent)
     const provider = createOpenAICompatible({
       name: 'zen',
       baseURL: baseURL,
       apiKey: process.env.PROVIDER_API_KEY,
       includeUsage: true,
-      ...(isDefaultZen
-        ? {
-            headers: {
-              'x-opencode-project': 'chat-server',
-              'x-opencode-session': 'ses_chat-server',
-              'x-opencode-request': 'chat-server',
-              'x-opencode-client': 'opencode-tui',
-              'User-Agent': 'opencode/1.14.50',
-            },
-          }
-        : {}),
+      ...(userAgent ? { headers: { 'User-Agent': userAgent } } : {}),
     })
     return provider(process.env.MODEL || 'big-pickle') // NOSONAR
   }
