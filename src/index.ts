@@ -194,7 +194,7 @@ function getModel() {
       !process.env.PROVIDER_API_KEY
     debug('Default Zen Configuration:', isDefaultZen)
     // NOTE: AI SDK appends a suffix to the UA: '<userAgent> ai-sdk/provider-utils/x runtime/node'
-    const userAgent = providerUserAgent ?? (isDefaultZen ? 'opencode/1.18.19' : undefined)
+    const userAgent = providerUserAgent ?? (isDefaultZen ? 'opencode/version' : undefined)
     debug('User-Agent:', userAgent)
     const provider = createOpenAICompatible({
       name: 'zen',
