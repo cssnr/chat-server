@@ -26,6 +26,7 @@
 - [Setup](#setup)
   - [Configure](#configure)
 - [Client](#client)
+  - [Endpoints](#endpoints)
   - [VitePress Plugin](#vitepress-chat-plugin)
 - [Development](#development)
 - [Support](#support)
@@ -42,24 +43,25 @@ To get started [Setup](#setup) and [Configure](#configure) the server. No API Ke
 
 [![View Live Demo](https://img.shields.io/badge/view_live_demo-green?style=for-the-badge&logo=chatbot&logoColor=white)](https://cssnr.github.io/vitepress-chat/)
 
-- Client: https://github.com/cssnr/vitepress-chat
-- Server: https://github.com/cssnr/chat-server
+- Client: <https://github.com/cssnr/vitepress-chat>
+- Server: <https://github.com/cssnr/chat-server>
 
 ### Features
 
 - Works with Claude, OpenAI, Gemini and OpenAI Compatible Providers
-- Live Stream Results to Client
+- Includes Chat, Completion, and Object Endpoints
+- Supports Multiple Clients Simultaneously
+- Live Streams the Results to the Client
 - Automatic Input Token Caching
 - Automatic Retry on API Failures
 - Deploy with Docker or Node
-- Supports Multiple Clients Simultaneously
 - Plus all the [Client Features](https://github.com/cssnr/vitepress-chat?tab=readme-ov-file#features)
 
 Built with the [AI SDK](https://ai-sdk.dev/).
 
 ## Setup
 
-💡 The server works out-of-the box with NO environment variables.
+💡 The server works out-of-the-box with NO environment variables.
 
 [![Deploy to Render](https://img.shields.io/badge/Deploy_to_Render-4351E8?style=for-the-badge&logo=render)](https://render.com/deploy?repo=https://github.com/cssnr/chat-server)
 
@@ -99,18 +101,25 @@ For a Portainer Deploy workflow see the [.github/workflows/deploy.yaml](https://
 
 💡 All variables are optional. The default `big-pickle` model works with NO API Key.
 
-Environment Variables.
+Environment Variables (can be placed in a `settings.env` file).
 
-| Variable                              | Default                      | Description                         |
-| :------------------------------------ | :--------------------------- | :---------------------------------- |
-| `MODEL`                               | `big-pickle`                 | Model to Use                        |
-| `BASE_URL`                            | `https://opencode.ai/zen/v1` | OpenAI Compatible Provider Base URL |
-| [PROVIDER_OPTIONS](#PROVIDER_OPTIONS) | -                            | Provider Options JSON String        |
-| `MAX_TOKENS`                          | -                            | Max Output Tokens                   |
-| `INSTRUCTIONS`                        | -                            | Fallback System Instructions        |
-| `AI_SDK_LOG_WARNINGS`                 | -                            | Disable SDK Warnings                |
-| `CORS_ORIGINS`                        | -                            | Allowed CORS Origins (supports \*)  |
-| `PORT`                                | `3000`                       | Server Port                         |
+| Variable                                    | Default                             | Description                           |
+| :------------------------------------------ | :---------------------------------- | :------------------------------------ |
+| `MODEL`                                     | `big-pickle`                        | Model to Use                          |
+| `BASE_URL`                                  | `https://opencode.ai/zen/v1`        | OpenAI Compatible Provider Base URL   |
+| `MAX_TOKENS`                                | -                                   | Max Output Tokens                     |
+| [PROVIDER_OPTIONS](#PROVIDER_OPTIONS)       | -                                   | Provider Options JSON String          |
+| [PROVIDER_USER_AGENT](#PROVIDER_USER_AGENT) | [_see below_](#PROVIDER_USER_AGENT) | OpenAI Compatible Provider User-Agent |
+| [INSTRUCTIONS_CHAT](#INSTRUCTIONS)          | -                                   | System Instructions for Chat          |
+| [INSTRUCTIONS_COMPLETION](#INSTRUCTIONS)    | -                                   | System Instructions for Completion    |
+| [INSTRUCTIONS_OBJECT](#INSTRUCTIONS)        | -                                   | System Instructions for Object        |
+| `DISABLE_CLIENT_INSTRUCTIONS`**¹**          | -                                   | Ignore Client System Instructions     |
+| `AI_SDK_LOG_WARNINGS`**¹**                  | -                                   | Enable SDK Warnings Logging           |
+| `CORS_ORIGINS`                              | -                                   | Allowed CORS Origins (supports \*)    |
+| `PORT`                                      | `3000`                              | Server Port                           |
+| `DEBUG`                                     | -                                   | Set to `app` for Debug Logging        |
+
+> **¹** Boolean Variables. **True** values include: `['1', 't', 'true', 'y', 'yes', 'on']`
 
 You must also set the API key for the `MODEL` you select.
 
@@ -122,6 +131,15 @@ You must also set the API key for the `MODEL` you select.
 | `PROVIDER_API_KEY`             | OpenAI Compatible Provider |
 
 The `PROVIDER_API_KEY` is optional for free-tier models like `big-pickle`.
+
+#### INSTRUCTIONS
+
+There are mechanisms to override the instructions per-call for all clients on all endpoints.  
+These are used as fallback when those instructions are not sent for configurations where this is desired.
+
+The `INSTRUCTIONS` variable (legacy) also points to the `INSTRUCTIONS_CHAT` variable (recommended).
+
+To disable the clients ability to send custom instructions set `DISABLE_CLIENT_INSTRUCTIONS=true`
 
 #### PROVIDER_OPTIONS
 
@@ -140,32 +158,121 @@ PROVIDER_OPTIONS='{"openai":{"serviceTier":"flex","reasoningEffort":"low"}}'
 ```
 
 You are responsible for providing valid options for the chosen model.
-The SDK supports providing provider options for multiple provider simultaneously.
+The SDK supports providing provider options for multiple providers simultaneously.
 The value is only checked for valid JSON at startup and will fail at runtime if it contains invalid options.
+
+#### PROVIDER_USER_AGENT
+
+If BASE_URL, MODEL, and PROVIDER_API_KEY are not set (Default Zen), a custom header is set:
+
+```text
+User-Agent: opencode/version
+```
+
+This header increases the rate limit for request for the free OpenCode Zen endpoint.
+
+To disable this without changing one of the above variables, you can set an empty value:
+
+```text
+PROVIDER_USER_AGENT=
+```
+
+Otherwise, you can set a custom User-Agent (prefix) to anything you choose:
+
+```text
+PROVIDER_USER_AGENT='my-app/1.0'
+```
+
+NOTE: The AI SDK appends a suffix to the UA: `<userAgent> ai-sdk/provider-utils/x runtime/node`
 
 ## Client
 
-To send System Instructions from the client, add them to the body.
+### Endpoints
+
+| Endpoint      | Method | Description                                                                                                                            |
+| :------------ | :----: | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `/chat`       | `POST` | Use with [useChat](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) and [VitePress Chat](https://cssnr.github.io/vitepress-chat/) |
+| `/completion` | `POST` | Use with [useCompletion](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion)                                                   |
+| `/object`     | `POST` | Use with [useObject](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object)                                                           |
+
+Note: The `/` endpoint (legacy) also points to the `/chat` endpoint (recommended).
+
+#### chat
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat>
 
 ```typescript
-const chat = new Chat({
+import { useChat } from '@ai-sdk/vue'
+import { DefaultChatTransport } from 'ai'
+
+const { messages, sendMessage, status, stop } = useChat({
   transport: new DefaultChatTransport({
-    api: 'https://chat-server.cssnr.com/',
+    api: 'https://chat-server.cssnr.com/chat',
     headers: { Authorization: 'Basic Abc123=' },
-    body: { system: 'You are a helpful assistant.' },
+    body: { instructions: 'You are a helpful assistant.' },
   }),
 })
 ```
+
+To send System Instructions from the client, add them to the body.
+
+#### completion
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-completion>
+
+```typescript
+import { useCompletion } from '@ai-sdk/vue'
+
+const { completion, complete, isLoading, stop } = useCompletion({
+  api: 'https://chat-server.cssnr.com/completion',
+  headers: { Authorization: 'Basic Abc123=' },
+  body: { instructions: 'You are a helpful assistant.' },
+})
+
+await complete('Explain how to set up cssnr/chat-server')
+```
+
+To send System Instructions from the client, add them to the body.
+
+#### object
+
+Reference: <https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-object>
+
+```typescript
+import { useObject } from '@ai-sdk/vue'
+import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
+
+const schema = z.object({ name: z.string(), age: z.number() })
+
+const { object, submit } = useObject({
+  api: 'https://chat-server.cssnr.com/object',
+  headers: { Authorization: 'Basic Abc123=' },
+  schema,
+})
+
+submit({
+  instructions: 'You are a helpful assistant.',
+  prompt: 'Extract the name and age from: John is 30 years old.',
+  output: zodToJsonSchema(schema),
+})
+```
+
+To send System Instructions and Output Schema from the client, add them to the body.
+
+Note: Both `instructions` and `output` are custom body parameters parsed by the server.
 
 ### VitePress Chat Plugin
 
 The client is currently available as a VitePress Plugin.
 
-- https://github.com/cssnr/vitepress-chat
+- <https://github.com/cssnr/vitepress-chat>
 
 [![View Documentation](https://img.shields.io/badge/view_documentation-blue?style=for-the-badge&logo=googledocs&logoColor=white)](https://cssnr.github.io/vitepress-chat/)
 
 ## Development
+
+To enable debug logs set: `DEBUG=app`
 
 This works with no configuration using the `big-pickle` model.  
 You can set your environment variables in the `settings.env` file.  
@@ -224,11 +331,3 @@ and [additional](https://cssnr.com/) open source projects.
 [![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/cssnr)
 
 For a full list of current projects visit: [https://cssnr.github.io/](https://cssnr.github.io/)
-
-<a href="https://github.com/cssnr/chat-server/stargazers">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cssnr/chat-server&type=date&legend=bottom-right&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=cssnr/chat-server&type=date&legend=bottom-right" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=cssnr/chat-server&type=date&legend=bottom-right" />
- </picture>
-</a>

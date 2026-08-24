@@ -23,6 +23,7 @@ ARG VERSION="Dockerfile"
 ENV APP_VERSION="${VERSION}"
 LABEL org.opencontainers.image.version="${VERSION}"
 
-USER node
+#USER node
+USER 1000
 
 CMD ["npm", "start"]
